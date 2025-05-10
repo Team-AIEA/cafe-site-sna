@@ -3,15 +3,19 @@ from flask_login import LoginManager, login_user, logout_user, login_required, c
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.dialects.postgresql import JSON
 from werkzeug.security import generate_password_hash, check_password_hash
+from dotenv import load_dotenv
+import os
+
+load_dotenv()  # Load environment variables from .env file
 
 app = Flask(__name__)
-app.secret_key = 'your-secret-key'
+app.secret_key = os.getenv('SECRET_KEY')
 
 login_manager = LoginManager()
 login_manager.init_app(app)
 
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'lol'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
 db = SQLAlchemy(app)
 
 # 👑 Admin users
@@ -59,10 +63,6 @@ class Item(db.Model):
 
 with app.app_context():
     db.create_all()
-
-
-# Dummy user storage (replace with DB logic) #TODO: Replace with DB
-USERS = {'admin': {'password': '1234'}}
 
 class User(UserMixin):
     def __init__(self, username):
@@ -127,7 +127,8 @@ def order(order_id):
             'table_id': order.table_id,
             'status': order.status,
             'order_number': order.order_number,
-            'items': order.items
+            'items': order.items,
+            'restaurant_id': order.restaurant_id
         })
 
     elif request.method == 'POST':
@@ -140,7 +141,7 @@ def order(order_id):
         except (TypeError, ValueError):
             return jsonify({'error': 'Invalid input'}), 400
 
-        new_order = Order(table_id=table_id, order_number=order_number, status=status, items=items, restaurant_id=1)  # Update restaurant_id as needed
+        new_order = Order(table_id=table_id, order_number=order_number, status=status, items=items, restaurant_id=data.get('restaurant_id'))  # Update restaurant_id as needed
         db.session.add(new_order)
         db.session.commit()
         return jsonify({'message': 'Order created', 'id': new_order.id}), 201
