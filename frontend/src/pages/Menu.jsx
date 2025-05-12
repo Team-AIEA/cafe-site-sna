@@ -49,6 +49,28 @@ function Menu() {
         return  cart[itemId];
     }
 
+    function getMoreInfo(itemId){
+        // Fetch item details from the backend
+        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
+        fetch(`${API_BASE_URL}/api/items/${itemId}`, {
+            method: 'GET',
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch item details');
+                }
+                return response.json();
+            })
+            .then((data) => {
+                console.log('Item details:', data);
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+            return;
+    }
+
+
     function placeOrder(){
         const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
         const token = localStorage.getItem('access_token');
