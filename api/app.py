@@ -10,6 +10,7 @@ import jwt
 from datetime import datetime, timedelta, timezone
 from flask_cors import CORS
 
+
 load_dotenv()  # Load environment variables from .env file
 
 app = Flask(__name__)
@@ -115,18 +116,22 @@ def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         auth_header = request.headers.get('Authorization')
-        token = request.cookies.get('access_token')
-        if (not auth_header or not auth_header.startswith('Bearer ')):
+        print("Authorization header:", auth_header)
+        if not auth_header or not auth_header.startswith('Bearer '):
+            print("Not an admin 1")
             return jsonify({'error': 'Admin access required'}), 403
 
         token = auth_header.replace('Bearer ', '')
+
         user = validate_token(token)
         if not user or not isinstance(user, AdminUser):
+            print("Not an admin 2")
             return jsonify({'error': 'Admin access required'}), 403
 
-        login_user(user)  # Set the user as the current_user
+        login_user(user)
         return f(*args, **kwargs)
     return decorated_function
+
 
 
 @app.route('/api/', methods=['GET'])
@@ -197,8 +202,9 @@ def signup():
 @app.route('/api/orders', methods=['GET'])
 @admin_required
 def list_orders():
+    print("Hi!")
     orders = Order.query.all()
-    return jsonify([
+    return jsonify({'orders': [
         {
             'id': o.id,
             'status': o.status,
@@ -206,7 +212,7 @@ def list_orders():
             'order_number': o.order_number,
             'items': o.items
         } for o in orders
-    ]), 200
+    ]}), 200
 
 
 @app.route('/api/order/<int:order_id>', methods=['GET', 'POST', 'PUT'])

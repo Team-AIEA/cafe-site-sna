@@ -6,6 +6,7 @@ import Admin from './pages/admin/Main';
 import Table from './pages/Table';
 import Dish from './pages/Dish';
 import Order from './pages/Order';
+import Orders from './pages/Order';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="/Dish" element={<Dish />} />
         <Route path="/order/:id" element={<Order />} />
         <Route path="/order/" element={<Order />} />
+        <Route path="/orders/" element={<Orders />} />
       </Routes>
     </Router>
   );
