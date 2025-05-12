@@ -300,6 +300,7 @@ def handle_items():
                 'id': item.id,
                 'name': item.name,
                 'description': item.description,
+                'src': item.src,
                 'price': item.price,
                 'available': item.available,
                 'restaurant_id': item.restaurant_id
