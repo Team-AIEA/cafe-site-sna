@@ -335,6 +335,7 @@ def handle_item(item_id):
         return jsonify({
             'id': item.id,
             'name': item.name,
+            'src': item.src,
             'description': item.description,
             'price': item.price,
             'available': item.available
