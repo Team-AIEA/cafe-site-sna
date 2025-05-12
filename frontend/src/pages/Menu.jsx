@@ -37,15 +37,19 @@ function Menu() {
             });
     }, []);
 
-    const addToCart = (itemId) => {
+    function addToCart(itemId){
         const updatedCart = { ...cart };
         updatedCart[itemId] = (updatedCart[itemId] || 0) + 1; // Increment quantity
         setCart(updatedCart);
         console.log("Set cart")
         localStorage.setItem('cart', JSON.stringify(updatedCart)); // Save cart to localStorage
-    };
+    }
+    
+    function getItems(itemId){
+        return  cart[itemId];
+    }
 
-    const placeOrder = () => {
+    function placeOrder(){
         const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
         const token = localStorage.getItem('access_token');
         const aboba = localStorage.getItem('cart');
@@ -78,7 +82,7 @@ function Menu() {
                 console.error('Error:', error);
                 alert('Failed to place order. Please try again.');
             });
-    };
+    }
 
     return (
         <div>
@@ -86,7 +90,7 @@ function Menu() {
         <div className='menu-div'>
             {console.log(items)}
                 {items.map((item) => (
-                    <MenuItem id={item.id} name={item.name} price={item.price} onAddToCart={addToCart} img={item.src}/>
+                    <MenuItem id={item.id} name={item.name} price={item.price} onAddToCart={addToCart} img={item.src} val={getItems(item.id)}/>
                 ))}
             <button onClick={placeOrder} disabled={Object.keys(cart).length === 0}>
                 Place Order
