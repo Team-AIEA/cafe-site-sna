@@ -347,6 +347,7 @@ def handle_item(item_id):
         data = request.get_json()
         try:
             item.name = data.get('name', item.name)
+            item.src = data.get('src', item.src)
             item.description = data.get('description', item.description)
             item.price = int(data.get('price', item.price))
             item.available = bool(data.get('available', item.available))
