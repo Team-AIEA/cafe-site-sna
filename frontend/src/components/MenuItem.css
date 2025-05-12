@@ -1,0 +1,13 @@
+.menu-item {
+    background-color: #EF9651;
+    align-items: center;
+    width: 40%;
+
+    padding: 10px;
+    margin-bottom: 20px;
+}
+
+.menu-item-name {
+    color: white;
+    font-weight: bold;
+}

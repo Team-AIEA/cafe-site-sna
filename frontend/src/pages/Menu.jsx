@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import MenuItem from '../components/MenuItem.jsx'
 
 function Menu() {
     const navigate = useNavigate();
@@ -77,18 +78,15 @@ function Menu() {
 
     return (
         <div>
-            <h1>Menu</h1>
-            <ul>
+        <h1>Food & Drinks</h1>
+        <div className='menu-div'>
                 {items.map((item) => (
-                    <li key={item.id}>
-                        {item.name} - ${item.price}
-                        <button onClick={() => addToCart(item.id)}>Add to Cart</button>
-                    </li>
+                    <MenuItem id={item.id} name={item.name} price={item.price} onAddToCart={addToCart} img={""}/>
                 ))}
-            </ul>
             <button onClick={placeOrder} disabled={Object.keys(cart).length === 0}>
                 Place Order
             </button>
+        </div>
         </div>
     );
 }
