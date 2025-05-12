@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import MenuItem from '../components/MenuItem.jsx'
 
 function Menu() {
@@ -84,8 +84,9 @@ function Menu() {
         <div>
         <h1>Food & Drinks</h1>
         <div className='menu-div'>
+            {console.log(items)}
                 {items.map((item) => (
-                    <MenuItem id={item.id} name={item.name} price={item.price} onAddToCart={addToCart} img={""}/>
+                    <MenuItem id={item.id} name={item.name} price={item.price} onAddToCart={addToCart} img={item.src}/>
                 ))}
             <button onClick={placeOrder} disabled={Object.keys(cart).length === 0}>
                 Place Order
