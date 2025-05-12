@@ -88,13 +88,15 @@ def generate_token(user_id):
         'iat': datetime.now(timezone.utc)
 
     }
-    token = jwt.encode(payload, "hi", algorithm='HS256')# app.secret_key, algorithm='HS256')
+    token = jwt.encode(payload, app.secret_key, algorithm='HS256')# app.secret_key, algorithm='HS256')
     return token
 
 # Utility function to validate the token and retrieve the user
-def validate_token(token):
+def validate_token(token:str):
+    print("Validating token:", token)
     try:
         payload = jwt.decode(token, app.secret_key, algorithms=['HS256'])
+        print('Payload:', payload, 'Payload user id', payload['user_id'])
         user = AdminUser.query.get(payload['user_id'])
         if user:
             print('User found:', user.username)
@@ -112,19 +114,17 @@ def validate_token(token):
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        print("Checking...")
+        auth_header = request.headers.get('Authorization')
         token = request.cookies.get('access_token')
-        if not token:
-            print("No token found")
+        if (not auth_header or not auth_header.startswith('Bearer ')):
             return jsonify({'error': 'Admin access required'}), 403
 
+        token = auth_header.replace('Bearer ', '')
         user = validate_token(token)
         if not user or not isinstance(user, AdminUser):
-            print("Not an admin")
             return jsonify({'error': 'Admin access required'}), 403
 
         login_user(user)  # Set the user as the current_user
-        print("Admin access granted")
         return f(*args, **kwargs)
     return decorated_function
 
@@ -151,7 +151,7 @@ def login():
 
         # Set the token in a secure cookie
         response = jsonify({'message': 'Logged in', 'token': token})
-        response.set_cookie('access_token', token, httponly=True, secure=False)  #TODO: Use secure=True in production
+        # response.set_cookie('access_token', token, httponly=True, secure=False)  #TODO: Use secure=True in production
         return response, 200
 
     return jsonify({'error': 'Invalid credentials'}), 401
