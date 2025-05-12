@@ -4,7 +4,12 @@ import MenuItem from '../components/MenuItem.jsx'
 
 function Menu() {
     const navigate = useNavigate();
-    const [items, setItems] = useState([]);
+    const location = useLocation();
+    const queryParams = new URLSearchParams(location.search);
+    const table_id = queryParams.get('table');
+    const restaurant_id = queryParams.get('restaurant');
+    
+  const [items, setItems] = useState([]);
     const [cart, setCart] = useState(() => {
         // Load cart from localStorage
         const savedCart = localStorage.getItem('cart');
@@ -49,14 +54,12 @@ function Menu() {
             console.log('You must be logged in to place an order.');
         }
 
-        const table_id = 0; // Replace with actual table_id logic if needed
-
         fetch(`${API_BASE_URL}/api/order/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ table_id, items: cart }),
+            body: JSON.stringify({ table_id, restaurant_id, items: cart }),
         })
             .then((response) => {
                 if (!response.ok) {
@@ -65,7 +68,8 @@ function Menu() {
                 return response.json();
             })
             .then((data) => {
-                alert('Order placed successfully!');
+                console.log('Order placed successfully!');
+                localStorage.setItem('order_id', data.id);
                 setCart({}); // Clear cart
                 localStorage.removeItem('cart'); // Remove cart from localStorage
                 navigate(`/order/${data.id}`); // Redirect to order details page using order ID

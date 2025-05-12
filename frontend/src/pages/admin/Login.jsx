@@ -26,6 +26,7 @@ function Login() {
 
       const data = await response.json();
       localStorage.setItem('access_token', data.token); // Store the token
+      console.log(data)
       navigate('/admin', { replace: true }); // Redirect to admin page
     } catch (err) {
       setError(err.message);
