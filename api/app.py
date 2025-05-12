@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 from functools import wraps
 import os
 import jwt
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from flask_cors import CORS
 
 load_dotenv()  # Load environment variables from .env file
@@ -19,13 +19,13 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 # Enable CORS for the Flask app
-CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}})
+CORS(app, resources={r"/*": {"origins": ["http://localhost:5173", "38.244.138.103:22594"]}}) #TODO: change to production domain
 
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
 db = SQLAlchemy(app)
 
 # 👑 Admin users
-class AdminUser(db.Model):
+class AdminUser(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password_hash = db.Column(db.String(256), nullable=False)
@@ -67,6 +67,7 @@ class Item(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text, nullable=True)
+    src = db.Column(db.Text, nullable=True)
     price = db.Column(db.Integer, nullable=False)
     available = db.Column(db.Boolean, default=True)
     restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurant.id'), nullable=False)
@@ -83,8 +84,9 @@ def load_user(user_id):
 def generate_token(user_id):
     payload = {
         'user_id': user_id,
-        'exp': datetime.now() + timedelta(hours=1),  # Token expires in 1 hour
-        'iat': datetime.now()  # Issued at time
+        'exp': datetime.now(timezone.utc) + timedelta(hours=1),
+        'iat': datetime.now(timezone.utc)
+
     }
     token = jwt.encode(payload, "hi", algorithm='HS256')# app.secret_key, algorithm='HS256')
     return token
@@ -95,10 +97,13 @@ def validate_token(token):
         payload = jwt.decode(token, app.secret_key, algorithms=['HS256'])
         user = AdminUser.query.get(payload['user_id'])
         if user:
+            print('User found:', user.username)
             return user
     except jwt.ExpiredSignatureError:
+        print("Token has expired")
         return None  # Token has expired
     except jwt.InvalidTokenError:
+        print("Invalid token")
         return None  # Invalid token
     return None
 
@@ -107,8 +112,19 @@ def validate_token(token):
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if not current_user.is_authenticated or not isinstance(current_user, AdminUser):
+        print("Checking...")
+        token = request.cookies.get('access_token')
+        if not token:
+            print("No token found")
             return jsonify({'error': 'Admin access required'}), 403
+
+        user = validate_token(token)
+        if not user or not isinstance(user, AdminUser):
+            print("Not an admin")
+            return jsonify({'error': 'Admin access required'}), 403
+
+        login_user(user)  # Set the user as the current_user
+        print("Admin access granted")
         return f(*args, **kwargs)
     return decorated_function
 
@@ -129,7 +145,14 @@ def login():
     if user and user.check_password(data['password']):
         # Generate a token (e.g., JWT)
         token = generate_token(user.id)  # Replace with your token generation logic
-        return jsonify({'message': 'Logged in', 'token': token}), 200
+        print("Token generated:", token)
+        login_user(user)  # sets current_user
+        print(current_user.is_authenticated)
+
+        # Set the token in a secure cookie
+        response = jsonify({'message': 'Logged in', 'token': token})
+        response.set_cookie('access_token', token, httponly=True, secure=False)  #TODO: Use secure=True in production
+        return response, 200
 
     return jsonify({'error': 'Invalid credentials'}), 401
 
@@ -201,20 +224,20 @@ def order(order_id):
             'restaurant_id': order.restaurant_id
         })
 
-    elif request.method == 'POST':
-        data = request.get_json()
-        try:
-            table_id = int(data.get('table_id'))
-            order_number = int(data.get('order_number'))
-            status = int(data.get('status', 0))  # Default to 0 = order placed
-            items = data.get('items', {})
-        except (TypeError, ValueError):
-            return jsonify({'error': 'Invalid input'}), 400
+    # elif request.method == 'POST':
+    #     data = request.get_json()
+    #     try:
+    #         table_id = int(data.get('table_id'))
+    #         order_number = int(data.get('order_number'))
+    #         status = int(data.get('status', 0))  # Default to 0 = order placed
+    #         items = data.get('items', {})
+    #     except (TypeError, ValueError):
+    #         return jsonify({'error': 'Invalid input'}), 400
 
-        new_order = Order(table_id=table_id, order_number=order_number, status=status, items=items, restaurant_id=data.get('restaurant_id'))  # Update restaurant_id as needed
-        db.session.add(new_order)
-        db.session.commit()
-        return jsonify({'message': 'Order created', 'id': new_order.id}), 201
+    #     new_order = Order(table_id=table_id, order_number=order_number, status=status, items=items, restaurant_id=data.get('restaurant_id'))  # Update restaurant_id as needed
+    #     db.session.add(new_order)
+    #     db.session.commit()
+    #     return jsonify({'message': 'Order created', 'id': new_order.id}), 201
 
     elif request.method == 'PUT':
         if not current_user.is_authenticated:
@@ -240,6 +263,7 @@ def orderNew():
     data = request.get_json()
     print(request.get_json())
     try:
+        restaurant_id = int(data.get('restaurant_id'))
         table_id = int(data.get('table_id'))
         items = data.get('items', {})  # Expecting a dictionary {"item_id": quantity}
 
@@ -248,7 +272,7 @@ def orderNew():
             return jsonify({'error': 'Invalid items format. Expected a dictionary of {"item_id": quantity}'}), 400
 
         # Generate a unique order number (e.g., based on timestamp)
-        order_number = int(datetime.utcnow().timestamp())
+        order_number = int(datetime.now().timestamp())
         status = 0  # Default to 0 = order placed
 
         new_order = Order(
@@ -256,7 +280,7 @@ def orderNew():
             order_number=order_number,
             status=status,
             items=items,
-            restaurant_id=0  # Replace with logic to determine restaurant_id if needed
+            restaurant_id=restaurant_id
         )
         db.session.add(new_order)
         db.session.commit()
@@ -339,13 +363,13 @@ def handle_item(item_id):
 
 
 @app.route('/api/user', methods=['GET'])
-# @admin_required
+@admin_required
 def get_user():
     print(1)
     print(current_user)
-    if not current_user.is_authenticated:
-        print('No token found, redirecting to login');
-        return jsonify({'error': 'Unauthorized'}), 401
+    # if not current_user.is_authenticated:
+    #     print('No token found, redirecting to login')
+    #     return jsonify({'error': 'Unauthorized'}), 401
     print(2)
     return jsonify({
         'id': current_user.id,
@@ -369,25 +393,65 @@ def add_sample_user():
         contact_info="123-456-7890",
         description="A sample restaurant for testing purposes.",
     )
-    new_item = Item(
-        name="Sample Item",
-        description="A sample item for testing purposes.",
-        price=10,
-        available=True,
-        restaurant_id=0,
-    )
 
     # Save to the database
-    
     db.session.add(new_rest)
     db.session.query(Restaurant).filter_by(name="Sample Restaurant").update({"id": 0})
     db.session.add(new_user)
-    db.session.add(new_item)
+    a = [{
+        'name': 'Pizza',
+        'src': "https://www.hollywoodreporter.com/wp-content/uploads/2012/12/img_logo_blue.jpg?w=1440&h=810&crop=1"
+    },
+    {
+        'name': 'Burger',
+        'src': "https://plus.unsplash.com/premium_photo-1683619761468-b06992704398?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8YnVyZ2VyfGVufDB8fDB8fHww"
+    },
+    {
+        'name': 'Fries',
+        'src': "https://images.unsplash.com/photo-1518013431117-eb1465fa5752?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8ZnJpZXN8ZW58MHx8MHx8fDA%3D"
+    },
+        {
+        'name': 'Steak',
+        'src': "https://plus.unsplash.com/premium_photo-1723672929404-36ba6ed8ab50?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8c3RlYWt8ZW58MHx8MHx8fDA%3D"
+    },
+    {
+        'name': 'Cake',
+        'src': "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8Y2FrZXxlbnwwfHwwfHx8MA%3D%3D"
+    },
+    {
+        'name': 'Coffee',
+        'src': "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8Y29mZmVlfGVufDB8fDB8fHww"
+    },
+    {
+        'name': 'Long Island iced tea',
+        'src': "https://plus.unsplash.com/premium_photo-1721832905378-cf785bd21033?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8bG9uZyUyMGlzbGFuZCUyMGNvY2t0YWlsfGVufDB8fDB8fHww"
+    },
+    {
+        'name': 'Salad',
+        'src': "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8c2FsYWR8ZW58MHx8MHx8fDA%3D"
+    },
+    {
+        'name': 'Combo breakfast',
+        'src': "https://images.unsplash.com/photo-1504754524776-8f4f37790ca0?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8YnJlYWtmYXN0fGVufDB8fDB8fHww"
+    },
+    ]
+    for i in range(9):
+        new_item = Item(
+            name=a[i]['name'],
+            description="A sample item for testing purposes.",
+            src=a[i]['src'],
+            price=10*(i+1),
+            available=True,
+            restaurant_id=0,
+        )
+        db.session.add(new_item)
+
     db.session.commit()
 
 
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-        # db.drop_all()
     app.run(host='0.0.0.0', port=8000, debug=True)
+    # with app.app_context():
+    #     db.drop_all()
