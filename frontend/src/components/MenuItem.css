@@ -1,16 +1,18 @@
 .menu-item {
     background-color: #EF9651;
-    align-items: center;
+    text-align: center;
     width: 40%;
     border-radius: 7px;
 
     padding: 10px;
     margin-bottom: 20px;
+
+    font-size: large;
 }
 
 .menu-item-name {
     color: white;
-    /* font-weight: bold; */
+    font-weight: bold;
     text-align: center;
 }
 
@@ -21,5 +23,14 @@
 }
 
 .menu-item-price {
-    
+    display: inline-block;
+    background-color: #3F7D58;
+    color: white;
+    font-weight: bold;
+    border: none;
+    border-radius: 7px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
 }
