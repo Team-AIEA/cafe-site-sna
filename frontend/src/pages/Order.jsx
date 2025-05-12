@@ -60,9 +60,9 @@ function Order() {
         <div>
             <h1>Order Details</h1>
             <p><strong>Order ID:</strong> {order.id}</p>
-            <p><strong>Status:</strong> {order.status}</p>
+            {/* <p><strong>Status:</strong> {order.status}</p> */}
             <p><strong>Table ID:</strong> {order.table_id}</p>
-            <p><strong>Order Number:</strong> {order.order_number}</p>
+            {/* <p><strong>Order Number:</strong> {order.order_number}</p> */}
             <p><strong>Restaurant ID:</strong> {order.restaurant_id}</p>
             <h2>Items</h2>
             <ul>
