@@ -2,6 +2,7 @@
     background-color: #EF9651;
     align-items: center;
     width: 40%;
+    border-radius: 7px;
 
     padding: 10px;
     margin-bottom: 20px;
@@ -11,4 +12,14 @@
     color: white;
     /* font-weight: bold; */
     text-align: center;
+}
+
+.menu-item-img {
+    width: 180px;
+    height: 180px;
+    border-radius: 7px;
+}
+
+.menu-item-price {
+    
 }
