@@ -8,24 +8,44 @@ function Order() {
 
     useEffect(() => {
         const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
+        var order_id = localStorage.getItem('order_id');
+        if (order_id == id){
+            console.log("Order id is the same as the one in local storage");
+        }
+        else if (order_id == null && id != null){ 
+            order_id = id;
+        }
+        else if (id == null && order_id != null){ 
+            order_id = order_id;
+        }
+        else{
+            order_id = id;
+        }
 
-        // Fetch order details from the backend
-        fetch(`${API_BASE_URL}/api/order/${id}`, {
-            method: 'GET',
-        })
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error('Failed to fetch order details');
-                }
-                return response.json();
+        if (order_id !== null){
+            
+            // Fetch order details from the backend
+            fetch(`${API_BASE_URL}/api/order/${order_id}`, {
+                method: 'GET',
             })
-            .then((data) => {
-                setOrder(data);
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-                setError('Failed to load order details. Please try again later.');
-            });
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch order details');
+                    }
+                    return response.json();
+                })
+                .then((data) => {
+                    setOrder(data);
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    setError('Failed to load order details. Please try again later.');
+                });
+            }
+            else{
+                setError('No order id is specified.');
+            }
+        
     }, [id]);
 
     if (error) {

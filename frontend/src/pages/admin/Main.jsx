@@ -7,6 +7,7 @@ function Main() {
 
     useEffect(() => {
         const token = localStorage.getItem('access_token');
+        console.log(token)
         if (!token) {
             navigate('/login', { replace: true }); // Redirect to login if no token
             console.log('No token found, redirecting to login');
@@ -23,6 +24,7 @@ function Main() {
             },
         })
             .then((response) => {
+                console.log(response)
                 if (!response.ok) {
                     throw new Error('Failed to fetch user details');
                 }
