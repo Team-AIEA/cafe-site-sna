@@ -21,3 +21,17 @@ h1 {
   flex-wrap: wrap;
   gap: 10%;
 }
+
+.butt-down {
+  position: fixed;
+  bottom: 20px; /* Distance from bottom */
+  right: 20px; /* Distance from right */
+  width: 75px;
+}
+
+.butt-up {
+  position: fixed;
+  top: 20px; /* Distance from bottom */
+  left: 20px; /* Distance from right */
+  width: 50px;
+}

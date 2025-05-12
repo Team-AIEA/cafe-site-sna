@@ -37,9 +37,9 @@ function Menu() {
             });
     }, []);
 
-    function addToCart(itemId){
+    function addToCart(itemId, inc){
         const updatedCart = { ...cart };
-        updatedCart[itemId] = (updatedCart[itemId] || 0) + 1; // Increment quantity
+        updatedCart[itemId] = (updatedCart[itemId] || 0) + inc; // Increment quantity
         setCart(updatedCart);
         console.log("Set cart")
         localStorage.setItem('cart', JSON.stringify(updatedCart)); // Save cart to localStorage
@@ -86,9 +86,9 @@ function Menu() {
 
     return (
         <div>
+        <a href="/cart"><img className='butt-down' src='../src/assets/cart.png'></img></a>
         <h1>Food & Drinks</h1>
         <div className='menu-div'>
-            {console.log(items)}
                 {items.map((item) => (
                     <MenuItem id={item.id} name={item.name} price={item.price} onAddToCart={addToCart} img={item.src} val={getItems(item.id)}/>
                 ))}
