@@ -6,7 +6,7 @@ import Admin from './pages/admin/Main';
 import Table from './pages/Table';
 import Cart from './pages/Cart';
 import Order from './pages/Order';
-import Orders from './pages/Order';
+import Orders from './pages/Orders';
 
 function App() {
   return (

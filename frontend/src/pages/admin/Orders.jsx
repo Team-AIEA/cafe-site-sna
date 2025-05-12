@@ -6,6 +6,7 @@ function Orders() {
     const navigate = useNavigate();
 
     useEffect(() => {
+        console.log("HI!!!! ")
         const token = localStorage.getItem('access_token');
         console.log(token)
         if (!token) {
