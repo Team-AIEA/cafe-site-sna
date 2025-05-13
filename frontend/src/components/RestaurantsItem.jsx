@@ -69,7 +69,7 @@ const RestaurantsItem = () => {
                                             id={item.id}
                                             name={item.name}
                                             price={item.price}
-                                            img={item.img}
+                                            img={item.src}
                                             onAddToCart={console.log("ops")}
                                             val={item.price}
                                             description={item.description}
