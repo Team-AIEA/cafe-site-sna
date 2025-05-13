@@ -74,6 +74,32 @@ class Item(db.Model):
     available = db.Column(db.Boolean, default=True)
     restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurant.id'), nullable=False)
 
+class LowLevelItem():
+    def __init__(self, item_id, quantity):
+        self.id = item_id
+        item = Item.query.get(item_id)
+        try:
+            self.quantity = quantity
+            self.price = item.price
+            self.name = item.name
+            self.src = item.src
+            self.description = item.description
+            self.available = item.available
+            self.restaurant_id = item.restaurant_id
+        except Exception as e:
+            print(f"Error initializing LowLevelItem: {e}")
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'price': self.price,
+            'quantity': self.quantity,
+            'src': self.src,
+            'description': self.description,
+            'available': self.available,
+            'restaurant_id': self.restaurant_id
+        }
+
 with app.app_context():
     db.create_all()
 
@@ -257,26 +283,29 @@ def orderNew():
     try:
         restaurant_id = int(data.get('restaurant_id'))
         table_id = int(data.get('table_id'))
-        items = data.get('items', {})  # Expecting a dictionary {"item_id": quantity}
-        print('Items:', items)
-        print(items,'\n',isinstance(items, dict), all(isinstance(v, int) for v in items.values()))
+        items = data.get('items', {})  # {"item_id": quantity}
+        
         if not isinstance(items, dict) or not all(isinstance(v, int) for v in items.values()):
-            return jsonify({'error': 'Invalid items format. Expected a dictionary of {"item_id": quantity}'}), 400
+            return jsonify({'error': 'Invalid items format. Expected a dictionary of {"item_id": quantity}'}), 410
 
-        # Generate a unique order number (e.g., based on timestamp)
+        new_items = []
+        for item_id, quantity in items.items():
+            new_items.append(LowLevelItem(item_id, quantity))
+
         order_number = int(datetime.now().timestamp())
-        status = 0  # Default to 0 = order placed
+        status = 0  # Order placed
 
-        total_cost = sum(item.price * quantity for item_id, quantity in items.items() for item in Item.query.filter_by(id=item_id))
+        total_cost = sum(item.price * item.quantity for item in new_items)
 
         new_order = Order(
             total_cost=total_cost,
             table_id=table_id,
             order_number=order_number,
             status=status,
-            items=items,
+            items=[item.to_dict() for item in new_items],
             restaurant_id=restaurant_id
         )
+
         db.session.add(new_order)
         db.session.commit()
         return jsonify({'message': 'Order created', 'id': new_order.id}), 201
@@ -446,6 +475,11 @@ def add_sample_user():
 
     db.session.commit()
 
+def getPrice(item_id):
+    item = Item.query.get(item_id)
+    if item:
+        return item.price
+    return None
 
 if __name__ == '__main__':
     with app.app_context():
