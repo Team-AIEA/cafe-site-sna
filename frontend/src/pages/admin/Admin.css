@@ -1,0 +1,22 @@
+input {
+    border-radius: 7px;
+    border-style: none;
+    background-color: white !important;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding-top:5px;
+    padding-bottom: 5px;
+    padding-left: 5px;
+    width: 98%;
+}
+
+.cart-items {
+    width: 30%;
+}
+
+.div-login {
+    justify-content: center;
+    display: flex;
+    align-items: center;
+    height: 50vh;
+}

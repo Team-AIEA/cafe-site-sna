@@ -10,7 +10,6 @@ import jwt
 from datetime import datetime, timedelta, timezone
 from flask_cors import CORS
 
-
 load_dotenv()  # Load environment variables from .env file
 
 app = Flask(__name__)

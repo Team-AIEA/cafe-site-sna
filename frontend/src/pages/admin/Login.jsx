@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import './Admin.css';
 
 function Login() {
   const [username, setUsername] = useState('');
@@ -36,9 +37,10 @@ function Login() {
   return (
     <div>
       <h1>Admin Login</h1>
-      <form onSubmit={handleLogin}>
+      <div  className='div-login'>
+      <form onSubmit={handleLogin} className='cart-items'>
         <div>
-          <label htmlFor="username">Username:</label>
+          <label htmlFor="username">Username<br/></label>
           <input
             type="text"
             id="username"
@@ -48,7 +50,7 @@ function Login() {
           />
         </div>
         <div>
-          <label htmlFor="password">Password:</label>
+          <label htmlFor="password">Password<br/></label>
           <input
             type="password"
             id="password"
@@ -58,8 +60,10 @@ function Login() {
           />
         </div>
         {error && <p style={{ color: 'red' }}>{error}</p>}
-        <button type="submit">Login</button>
+        <div className='div-butt'><button className='butt-order' type="submit">Log in</button></div>
+        
       </form>
+      </div>
     </div>
   );
 }
