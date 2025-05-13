@@ -114,10 +114,10 @@ const RestaurantsItem = () => {
     return (
         <>
             <h1>Restaurants</h1>
-            <ul>
+            <ul className='rest-list'>
                 {restaurants.map((restaurant) => (
-                    <li key={restaurant.id} style={{ marginBottom: '2rem' }}>
-                        <strong
+                    <li className='cart-items' id='restaurants' key={restaurant.id}>
+                        <strong className='rest-name'
                             style={{ cursor: 'pointer' }}
                             onClick={() => handleRestaurantClick(restaurant.id)}
                         >
@@ -155,20 +155,20 @@ const RestaurantsItem = () => {
                                     onChange={(e) => handleInputChange(e, 'description', restaurant.id)}
                                     placeholder="Description"
                                 />
-                                <button onClick={() => saveRestaurantChanges(restaurant)}>Save</button>
+                                <button className='butt-order' id='save' onClick={() => saveRestaurantChanges(restaurant)}>Save</button>
                             </div>
                         ) : (
                             <>
                                 <p>{restaurant.address} — {restaurant.working_hours} — {restaurant.contact_info}</p>
                                 <p>{restaurant.description}</p>
-                                <button onClick={() => setEditingRestaurantId(restaurant.id)}>Edit</button>
+                                <button className='butt-order' onClick={() => setEditingRestaurantId(restaurant.id)}>Edit</button>
                             </>
                         )}
 
                         {selectedRestaurantId === restaurant.id && (
                             <>
                                 <p><em>Menu:</em></p>
-                                <ul>
+                                <ul id="items">
                                     {restaurant.items && restaurant.items.length > 0 ? (
                                         restaurant.items.map(item => (
                                             <EditableMenuItem

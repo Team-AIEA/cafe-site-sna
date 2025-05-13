@@ -57,10 +57,11 @@ const EditableMenuItem = ({ id, name, price, img, description, available }) => {
     };
     console.log("EditableMenuItem rendered with props:", { id, name, price, img, description, available });
     return (
-        <div className="menu-item">
+        <div className="menu-item" id="edit">
             <img src={img} alt={`${localName} image`} className="menu-item-img" />
             <input
                 className="menu-item-name"
+                id="edit"
                 value={localName}
                 onChange={onNameChange}
             />

@@ -40,7 +40,7 @@ function Login() {
       <div  className='div-login'>
       <form onSubmit={handleLogin} className='cart-items'>
         <div>
-          <label htmlFor="username">Username<br/></label>
+          <label style={{color: 'white'}} htmlFor="username">Username<br/></label>
           <input
             type="text"
             id="username"
@@ -50,7 +50,7 @@ function Login() {
           />
         </div>
         <div>
-          <label htmlFor="password">Password<br/></label>
+          <label style={{color: 'white'}} htmlFor="password">Password<br/></label>
           <input
             type="password"
             id="password"

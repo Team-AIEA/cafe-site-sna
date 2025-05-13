@@ -123,7 +123,7 @@ const Orders = () => {
                     .filter(order => selectedRestaurant === '' || order.restaurant_id === Number(selectedRestaurant))
                     .map((order) => (
 
-                    <li key={order.id} className='cart-items'>
+                    <li key={order.id} className='cart-items' id='orders'>
                         <strong>
                             Order #{order.id}</strong><br/>{STATUS_OPTIONS[order.status]?.label || 'Unknown'} — Restaurant {order.restaurant_id} — Table {order.table_id} — Order Number {order.order_number} — {order.total_cost}$
                         
@@ -132,7 +132,7 @@ const Orders = () => {
                         {Array.isArray(order.items) ? (
                             order.items.map((item) => (
                                 <div key={item.id}>
-                                    Item #{item.id}: {item.name} — ${item.price} × {item.quantity}
+                                    {item.name} — ${item.price} × {item.quantity}
                                 </div>
                             ))
                         ) : (
