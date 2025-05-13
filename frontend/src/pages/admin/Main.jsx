@@ -128,7 +128,7 @@ function Main() {
         <>
             <div className="header">
                 <h1>Hi {username}! {superuser && '👑'}</h1>
-                <button className="logout-btn" onClick={handleLogout}>Logout</button>
+                <button className="status-cancelled" id="logout" onClick={handleLogout}>Log out</button>
             </div>
 
             <div className="columns-parent">

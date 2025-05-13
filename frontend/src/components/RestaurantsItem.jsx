@@ -220,38 +220,43 @@ const RestaurantsItem = () => {
                 ))}
             </ul>
 
-            <h2>Add New Restaurant</h2>
-            <div>
+            <h1>Add New Restaurant</h1>
+            <div className="div-add">
                 <input
                     type="text"
                     placeholder="Name"
                     value={newRestaurant.name}
                     onChange={(e) => handleInputChange(e, 'name')}
+                    className="menu-item-description"
                 />
                 <input
                     type="text"
                     placeholder="Address"
                     value={newRestaurant.address}
                     onChange={(e) => handleInputChange(e, 'address')}
+                    className="menu-item-description"
                 />
                 <input
                     type="text"
                     placeholder="Working Hours"
                     value={newRestaurant.working_hours}
                     onChange={(e) => handleInputChange(e, 'working_hours')}
+                    className="menu-item-description"
                 />
                 <input
                     type="text"
                     placeholder="Contact Info"
                     value={newRestaurant.contact_info}
                     onChange={(e) => handleInputChange(e, 'contact_info')}
+                    className="menu-item-description"
                 />
                 <textarea
                     placeholder="Description"
                     value={newRestaurant.description}
                     onChange={(e) => handleInputChange(e, 'description')}
+                    className="menu-item-description"
                 />
-                <button onClick={addRestaurant}>Add Restaurant</button>
+                <button className="butt-order" id="save" onClick={addRestaurant}>Add Restaurant</button>
             </div>
         </>
     );
