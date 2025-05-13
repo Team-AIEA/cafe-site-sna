@@ -2,6 +2,11 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 function Order() {
+    
+    function deleteOrderFromLocalStorage() {
+        localStorage.removeItem('order_id');
+    }
+
     const { id } = useParams(); // Get the order ID from the URL
     const [order, setOrder] = useState(null);
     const [error, setError] = useState(null);
