@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import EditableMenuItem from './EditableMenuItem';
+import AddMenuItem from "./AddMenuItem";
 
 const RestaurantsItem = () => {
     const [restaurants, setRestaurants] = useState(null);
@@ -169,6 +170,26 @@ const RestaurantsItem = () => {
                             <>
                                 <p><em>Menu:</em></p>
                                 <ul id="items">
+                                    <AddMenuItem
+                                        restaurant_id={restaurant.id}
+                                        onItemAdded={async (newItem) => {
+                                            // Ensure that newItem is valid before updating state
+                                            if (!newItem || !newItem.id) {
+                                                console.error("New item does not have valid id or data");
+                                                return;
+                                            }
+
+                                            // Update the restaurants state with the new item details
+                                            setRestaurants(prev =>
+                                                prev.map(r =>
+                                                    r.id === restaurant.id
+                                                        ? { ...r, items: [...(r.items || []), newItem] }
+                                                        : r
+                                                )
+                                            );
+                                        }}
+                                    />
+
                                     {restaurant.items && restaurant.items.length > 0 ? (
                                         restaurant.items.map(item => (
                                             <EditableMenuItem

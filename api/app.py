@@ -397,7 +397,9 @@ def handle_items():
                 name=data['name'],
                 description=data.get('description', ''),
                 price=int(data['price']),
-                available=bool(data.get('available', True))
+                available=bool(data.get('available', True)),
+                restaurant_id=data.get('restaurant_id'),
+                src=data.get('src', '')
             )
             db.session.add(new_item)
             db.session.commit()
