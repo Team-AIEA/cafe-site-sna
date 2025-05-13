@@ -6,7 +6,6 @@ import Admin from './pages/admin/Main';
 import Table from './pages/Table';
 import Cart from './pages/Cart';
 import Order from './pages/Order';
-import Orders from './pages/admin/Orders';
 
 function App() {
   return (
@@ -19,7 +18,6 @@ function App() {
         <Route path="/cart" element={<Cart />} />
         <Route path="/order/:id" element={<Order />} />
         <Route path="/order/" element={<Order />} />
-        <Route path="/orders/" element={<Orders />} />
       </Routes>
     </Router>
   );

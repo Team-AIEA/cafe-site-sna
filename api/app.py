@@ -237,7 +237,9 @@ def list_orders():
             'status': o.status,
             'table_id': o.table_id,
             'order_number': o.order_number,
-            'items': o.items
+            'items': o.items,
+            'total_cost': o.total_cost,
+            'restaurant_id': o.restaurant_id
         } for o in orders
     ]}), 200
 
@@ -402,6 +404,68 @@ def get_user():
         'id': current_user.id,
         'username': current_user.username
     }), 200
+
+
+@app.route('/api/restaurants', methods=['GET', 'POST'])
+def handle_restaurants():
+    if request.method == 'GET':
+        # Retrieve all restaurants
+        restaurants = Restaurant.query.all()
+        to_return = []
+        for r in restaurants:
+            print(f"Restaurant: {r.name}")
+            to_return.append({
+                'id': r.id,
+                'name': r.name,
+                'address': r.address,
+                'working_hours': r.working_hours,
+                'contact_info': r.contact_info,
+                'description': r.description,
+                'items': r.items
+            })
+
+        return jsonify(to_return), 200
+
+    elif request.method == 'POST':
+        # Add a new restaurant (Admin-only access)
+        if not current_user.is_authenticated or not isinstance(current_user, AdminUser):
+            return jsonify({'error': 'Admin access required'}), 403
+
+        data = request.get_json()
+        try:
+            new_restaurant = Restaurant(
+                name=data['name'],
+                address=data['address'],
+                working_hours=data.get('working_hours', ''),
+                contact_info=data.get('contact_info', ''),
+                description=data.get('description', '')
+            )
+            db.session.add(new_restaurant)
+            db.session.commit()
+            return jsonify({'message': 'Restaurant created', 'id': new_restaurant.id}), 201
+        except (KeyError, ValueError):
+            return jsonify({'error': 'Invalid input'}), 400
+
+
+@app.route('/api/restaurants/<int:restaurant_id>', methods=['PUT'])
+@admin_required
+def update_restaurant(restaurant_id):
+    # Update an existing restaurant
+    restaurant = Restaurant.query.get(restaurant_id)
+    if not restaurant:
+        return jsonify({'error': 'Restaurant not found'}), 404
+
+    data = request.get_json()
+    try:
+        restaurant.name = data.get('name', restaurant.name)
+        restaurant.address = data.get('address', restaurant.address)
+        restaurant.working_hours = data.get('working_hours', restaurant.working_hours)
+        restaurant.contact_info = data.get('contact_info', restaurant.contact_info)
+        restaurant.description = data.get('description', restaurant.description)
+        db.session.commit()
+        return jsonify({'message': 'Restaurant updated'}), 200
+    except (ValueError, TypeError):
+        return jsonify({'error': 'Invalid input'}), 400
 
 
 # Sample user creation function
