@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Orders from '../../components/OrdersItem';
+import RestaurantsItem from '../../components/RestaurantsItem';
 
 function Main() {
     const [username, setUsername] = useState(null);
@@ -46,6 +48,8 @@ function Main() {
     return (
         <>
             <h1>Hi {username}!</h1>
+            <Orders />
+            <RestaurantsItem/>
         </>
     );
 }

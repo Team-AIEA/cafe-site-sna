@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-function Orders() {
-    const [orders, setOrders] = useState(null);
+const RestaurantsItem = () => {
+    const [restaurants, setRestaurants] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -18,7 +18,7 @@ function Orders() {
 
         const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
 
-        fetch(`${API_BASE_URL}/api/orders`, {
+        fetch(`${API_BASE_URL}/api/restaurants`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -27,13 +27,13 @@ function Orders() {
             .then((response) => {
                 console.log("Response:", response);
                 if (!response.ok) {
-                    throw new Error('Failed to fetch orders');
+                    throw new Error('Failed to fetch restaurants');
                 }
                 return response.json();
             })
             .then((data) => {
-                console.log("Fetched orders data:", data);
-                setOrders(data.orders);
+                console.log("Fetched restaurants data:", data);
+                setRestaurants(data);
             })
             .catch((error) => {
                 console.error('Error:', error);
@@ -42,31 +42,19 @@ function Orders() {
             });
     }, [navigate]);
 
-    if (!orders) {
-        return <p>Loading orders...</p>; // Better UX than showing nothing
+    if (!restaurants) {
+        return <p>Loading restaurants...</p>; // Better UX than showing nothing
     }
 
     return (
         <>
-            <h1>Orders</h1>
+            <h1>Restaurants</h1>
             <ul>
-                {orders.map((order) => (
-                    <li key={order.id}>
+                {restaurants.map((restaurant) => (
+                    <li key={restaurant.id}>
                         <strong>
-                            Order #{order.id}: {order.status} — Table {order.table_id} — Order Number {order.order_number}
+                            Restaurant #{restaurant.id}: {restaurant.name} — {restaurant.address} — {restaurant.working_hours} — {restaurant.contact_info}
                         </strong>
-                        <br />
-                        {Array.isArray(order.items) ? (
-                            order.items.map((item) => (
-                                <div key={item.id}>
-                                    Item #{item.id}: {item.name} — ${item.price} × {item.quantity}
-                                </div>
-                            ))
-                        ) : (
-                            <div style={{ color: 'red' }}>
-                                ⚠️ Items data missing or invalid.
-                            </div>
-                        )}
                     </li>
                 ))}
             </ul>
@@ -74,4 +62,4 @@ function Orders() {
     );
 }
 
-export default Orders;
+export default RestaurantsItem;
