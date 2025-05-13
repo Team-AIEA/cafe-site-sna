@@ -281,8 +281,13 @@ def order(order_id):
         })
 
     elif request.method == 'PUT':
-        if not current_user.is_authenticated:
-            return jsonify({'error': 'Unauthorized'}), 403
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
+            return jsonify({'error': 'Admin access required'}), 403
+        token = auth_header.replace('Bearer ', '')
+        user = validate_token(token)
+        if not user or not isinstance(user, AdminUser):
+            return jsonify({'error': 'Admin access required'}), 403
 
         order = Order.query.get(order_id)
         if not order:
@@ -291,9 +296,33 @@ def order(order_id):
         data = request.get_json()
         try:
             if 'status' in data:
-                order.status = int(data['status'])
-            if 'items' in data:
-                order.items = data['items']
+                print('Status:', data['status'])
+                print(int(data['status']) not in [0, 1, 2, 3])
+                if int(data['status']) not in [0, 1, 2, 3]:  # Assuming status can be 0 (placed), 1 (in progress), 2 (completed) or 3 (canceled)
+                    return jsonify({'error': 'Invalid status value'}), 400
+                elif order.status == 3:
+                    return jsonify({'error': 'Order already canceled'}), 400
+                elif order.status == 2:
+                    return jsonify({'error': 'Order already completed'}), 400
+                elif order.status == 0 and int(data['status']) == 1:
+                    order.status = 1
+                elif order.status == 0 and int(data['status']) == 2:
+                    order.status = 2
+                elif order.status == 0 and int(data['status']) == 3:
+                    order.status = 2
+                elif order.status == 0 and int(data['status']) == 3:
+                    order.status = 3
+                elif order.status == 1 and int(data['status']) == 2:
+                    order.status = 2
+                elif order.status == 1 and int(data['status']) == 3:
+                    order.status = 3
+                elif order.status == 0 and int(data['status']) == 3:
+                    order.status = 3
+                else:
+                    return jsonify({'error': 'Invalid status transition'}), 400
+                
+            # if 'items' in data:
+            #     order.items = data['items']
             db.session.commit()
             return jsonify({'message': 'Order updated'}), 200
         except (TypeError, ValueError):
@@ -516,7 +545,7 @@ def add_sample_user():
     db.session.add(new_user)
     a = [{
         'name': 'Pizza',
-        'src': "https://www.hollywoodreporter.com/wp-content/uploads/2012/12/img_logo_blue.jpg?w=1440&h=810&crop=1"
+        'src': "https://plus.unsplash.com/premium_photo-1668771085743-1d2d19818140?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTN8fHBpenphfGVufDB8fDB8fHww"
     },
     {
         'name': 'Burger',

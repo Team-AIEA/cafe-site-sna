@@ -26,9 +26,13 @@ function Main() {
             },
         })
             .then((response) => {
-                console.log(response)
-                if (!response.ok) {
-                    throw new Error('Failed to fetch user details');
+                console.log(response);
+                if (response.status === 401 || response.status === 403) {
+                    navigate('/login', { replace: true });``
+                } else if (!response.ok) {
+                    console.log("Response status:", response.status);
+                    console.log("Response status text:", response.statusText);
+                     throw new Error('Failed to fetch user details');
                 }
                 return response.json();
             })
@@ -37,6 +41,7 @@ function Main() {
             })
             .catch((error) => {
                 console.error('Error:', error);
+
                 navigate('/login', { replace: true }); // Redirect to login if fetching user details fails
             });
     }, [navigate]);
