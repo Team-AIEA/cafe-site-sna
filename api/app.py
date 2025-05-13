@@ -309,7 +309,7 @@ def order(order_id):
                 elif order.status == 0 and int(data['status']) == 2:
                     order.status = 2
                 elif order.status == 0 and int(data['status']) == 3:
-                    order.status = 2
+                    order.status = 3
                 elif order.status == 0 and int(data['status']) == 3:
                     order.status = 3
                 elif order.status == 1 and int(data['status']) == 2:
