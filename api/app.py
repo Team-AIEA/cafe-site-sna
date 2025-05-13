@@ -61,6 +61,7 @@ class Order(db.Model):
     table_id = db.Column(db.Integer, nullable=False)
     order_number = db.Column(db.Integer, nullable=False)
     items = db.Column(JSON, nullable=True)  # { "item_id": quantity, ... }
+    total_cost = db.Column(db.Integer, nullable=False)
     restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurant.id'), nullable=False)
 
 # 🛍️ Item
@@ -203,7 +204,6 @@ def signup():
 @app.route('/api/orders', methods=['GET'])
 @admin_required
 def list_orders():
-    print("Hi!")
     orders = Order.query.all()
     return jsonify({'orders': [
         {
@@ -267,7 +267,10 @@ def orderNew():
         order_number = int(datetime.now().timestamp())
         status = 0  # Default to 0 = order placed
 
+        total_cost = sum(item.price * quantity for item_id, quantity in items.items() for item in Item.query.filter_by(id=item_id))
+
         new_order = Order(
+            total_cost=total_cost,
             table_id=table_id,
             order_number=order_number,
             status=status,
