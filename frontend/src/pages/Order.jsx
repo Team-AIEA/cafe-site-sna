@@ -5,25 +5,11 @@ function Order() {
     const { id } = useParams(); // Get the order ID from the URL
     const [order, setOrder] = useState(null);
     const [error, setError] = useState(null);
-
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
     useEffect(() => {
-        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
-        var order_id = localStorage.getItem('order_id');
-        if (order_id == id){
-            console.log("Order id is the same as the one in local storage");
-        }
-        else if (order_id == null && id != null){ 
-            order_id = id;
-        }
-        else if (id == null && order_id != null){ 
-            order_id = order_id;
-        }
-        else{
-            order_id = id;
-        }
-
+        let order_id = id || localStorage.getItem('order_id');
         if (order_id !== null){
-            
+            localStorage.setItem('order_id', order_id);
             // Fetch order details from the backend
             fetch(`${API_BASE_URL}/api/order/${order_id}`, {
                 method: 'GET',
@@ -47,7 +33,15 @@ function Order() {
             }
         
     }, [id]);
-
+    const [restaurant, setRestaurant] = useState(null);
+    // Fetch restaurant details based on the order's restaurant_id
+    useEffect(() => {
+        if (order?.restaurant_id === undefined || order?.restaurant_id === null) return;
+        fetch(`${API_BASE_URL}/api/restaurants/${order.restaurant_id}`)
+            .then(res => res.json())
+            .then(setRestaurant)
+            .catch(() => setRestaurant(null));
+    }, [order]);
     if (error) {
         return <div>Error: {error}</div>;
     }
@@ -65,6 +59,7 @@ function Order() {
             <p><strong>Table ID:</strong> {order.table_id}</p>
             {/* <p><strong>Order Number:</strong> {order.order_number}</p> */}
             <p><strong>Restaurant ID:</strong> {order.restaurant_id}</p>
+            <p><strong>Restaurant:</strong> {restaurant?.name || 'Loading...'} - {restaurant?.address || 'Loading...'} {restaurant?.working_hours || 'Loading...'} {restaurant?.description || 'Loading...'} {restaurant?.contact_info || 'Loading...'}</p>
             <h2>Items</h2>
             <ul>
                 {Object.entries(order.items).map(([itemId, item]) => (

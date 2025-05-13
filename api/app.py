@@ -432,18 +432,6 @@ def handle_restaurants():
     if request.method == 'GET':
         # Retrieve all restaurants
         restaurants = Restaurant.query.all()
-        to_return = []
-        for r in restaurants:
-            print(f"Restaurant: {r.name}")
-            to_return.append({
-                'id': r.id,
-                'name': r.name,
-                'address': r.address,
-                'working_hours': r.working_hours,
-                'contact_info': r.contact_info,
-                'description': r.description,
-                'items': r.items
-            })
         to_return = [r.to_dict() for r in restaurants]
         return jsonify(to_return), 200
 
@@ -468,25 +456,41 @@ def handle_restaurants():
             return jsonify({'error': 'Invalid input'}), 400
 
 
-@app.route('/api/restaurants/<int:restaurant_id>', methods=['PUT'])
-@admin_required
+@app.route('/api/restaurants/<int:restaurant_id>', methods=['GET', 'PUT'])
 def update_restaurant(restaurant_id):
-    # Update an existing restaurant
-    restaurant = Restaurant.query.get(restaurant_id)
-    if not restaurant:
-        return jsonify({'error': 'Restaurant not found'}), 404
+    if request.method == 'GET':
+        restaurant = Restaurant.query.get(restaurant_id)
+        if not restaurant:
+            return jsonify({'error': 'Restaurant not found'}), 404
+        return jsonify({
+            'id': restaurant.id,
+            'name': restaurant.name,
+            'address': restaurant.address,
+            'working_hours': restaurant.working_hours,
+            'contact_info': restaurant.contact_info,
+            'description': restaurant.description,
+            'items': [item.to_dict() for item in restaurant.items]
+        })
+    if request.method == 'PUT':
+        # Admin-only access
+        if not current_user.is_authenticated or not isinstance(current_user, AdminUser):
+            return jsonify({'error': 'Admin access required'}), 403
+        # Update an existing restaurant
+        restaurant = Restaurant.query.get(restaurant_id)
+        if not restaurant:
+            return jsonify({'error': 'Restaurant not found'}), 404
 
-    data = request.get_json()
-    try:
-        restaurant.name = data.get('name', restaurant.name)
-        restaurant.address = data.get('address', restaurant.address)
-        restaurant.working_hours = data.get('working_hours', restaurant.working_hours)
-        restaurant.contact_info = data.get('contact_info', restaurant.contact_info)
-        restaurant.description = data.get('description', restaurant.description)
-        db.session.commit()
-        return jsonify({'message': 'Restaurant updated'}), 200
-    except (ValueError, TypeError):
-        return jsonify({'error': 'Invalid input'}), 400
+        data = request.get_json()
+        try:
+            restaurant.name = data.get('name', restaurant.name)
+            restaurant.address = data.get('address', restaurant.address)
+            restaurant.working_hours = data.get('working_hours', restaurant.working_hours)
+            restaurant.contact_info = data.get('contact_info', restaurant.contact_info)
+            restaurant.description = data.get('description', restaurant.description)
+            db.session.commit()
+            return jsonify({'message': 'Restaurant updated'}), 200
+        except (ValueError, TypeError):
+            return jsonify({'error': 'Invalid input'}), 400
 
 
 # Sample user creation function
