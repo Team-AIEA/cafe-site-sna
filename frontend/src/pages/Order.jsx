@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams} from 'react-router-dom';
 
 function Order() {
-    
+    const navigate = useNavigate();
+
     function deleteOrderFromLocalStorage() {
         localStorage.removeItem('order_id');
+        navigate(`/`);
     }
 
     const { id } = useParams(); // Get the order ID from the URL
@@ -77,7 +79,8 @@ function Order() {
             </ul>
             </div>
             {order.status == 0 ? (<div className='status-created'>Created</div>) : order.status == 1 ? (<div className='status-cooking'>Cooking</div>)
-            : order.status == 2 ? (<div className='status-done'>Done</div>) : (<div className='status-cancelled'>Cancelled</div>)}
+            : order.status == 2 ? (<><div className='status-done'>Done</div><button onClick={deleteOrderFromLocalStorage}>New Order</button></>)
+             : (<><div className='status-cancelled'>Cancelled</div><button onClick={deleteOrderFromLocalStorage}>New Order</button></>)}
         </div>
     );
 }
