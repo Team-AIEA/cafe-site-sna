@@ -13,8 +13,9 @@ function Main() {
     });
     const [message, setMessage] = useState(null);
     const navigate = useNavigate();
+    const [restaurants, setRestaurants] = useState([]);
 
-    useEffect(() => {
+   useEffect(() => {
         const token = localStorage.getItem('access_token');
         if (!token) {
             navigate('/login', { replace: true });
@@ -23,6 +24,7 @@ function Main() {
 
         const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
 
+        // Fetch user info
         fetch(`${API_BASE_URL}/api/user`, {
             method: 'GET',
             headers: {
@@ -44,7 +46,19 @@ function Main() {
                 console.error('Error:', error);
                 navigate('/login', { replace: true });
             });
+
+        // Fetch restaurants
+        fetch(`${API_BASE_URL}/api/restaurants`, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+        })
+            .then(res => res.json())
+            .then(data => setRestaurants(data))
+            .catch(err => console.error('Failed to fetch restaurants:', err));
+
     }, [navigate]);
+
 
     const handleLogout = () => {
         const token = localStorage.getItem('access_token');
@@ -142,14 +156,20 @@ function Main() {
                         onChange={handleInputChange}
                         required
                     />
-                    <input
-                        type="number"
+                    <select
                         name="restaurant_id"
-                        placeholder="Restaurant ID"
                         value={newAdmin.restaurant_id}
                         onChange={handleInputChange}
                         required
-                    />
+                    >
+                        <option value="">Select a Restaurant</option>
+                        {restaurants.map((restaurant) => (
+                            <option key={restaurant.id} value={restaurant.id}>
+                                {restaurant.name ? restaurant.name : `Restaurant #${restaurant.id}`}
+                            </option>
+                        ))}
+                    </select>
+
                     <button type="submit">Add Admin</button>
                 </form>
                 {message && <p className="status-msg">{message}</p>}
