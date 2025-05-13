@@ -20,3 +20,39 @@ input {
     align-items: center;
     height: 50vh;
 }
+
+.columns-parent  {
+    display: flex;
+    flex-direction: row;
+    width: 100%; 
+    min-height: 100vh;
+}
+
+.col-orders {
+    flex: 1;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+.col-menu {
+    flex: 1;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+.status-change {
+    border-radius: 7px;
+  border-color:#3F7D58;
+  border-style: solid;
+  color:#3F7D58;
+  /* width: 100%; */
+  padding-top: 10px;
+  padding-bottom: 10px;
+  font-weight: bold;
+  font-size: large;
+  margin-top: 10px;
+  padding-left: 10px;
+  padding-right: 10px;
+
+  background-color: white;
+}

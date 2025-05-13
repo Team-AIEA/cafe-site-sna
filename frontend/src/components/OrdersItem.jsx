@@ -123,11 +123,12 @@ const Orders = () => {
                     .filter(order => selectedRestaurant === '' || order.restaurant_id === Number(selectedRestaurant))
                     .map((order) => (
 
-                    <li key={order.id} style={{ marginBottom: '20px' }}>
+                    <li key={order.id} className='cart-items'>
                         <strong>
                             Order #{order.id}: {STATUS_OPTIONS[order.status]?.label || 'Unknown'} — Table {order.table_id} — Order Number {order.order_number} - {order.restaurant_id} - {order.total_cost}$
                         </strong>
                         <br />  
+                        <div className='items-list'>
                         {Array.isArray(order.items) ? (
                             order.items.map((item) => (
                                 <div key={item.id}>
@@ -139,10 +140,11 @@ const Orders = () => {
                                 ⚠️ Items data missing or invalid.
                             </div>
                         )}
+                        </div>
                         <div style={{ marginTop: '10px' }}>
                             <label>
-                                Change Status:
-                                <select
+                                
+                                <select className='status-change'
                                     value={statusUpdates[order.id] || order.status}
                                     onChange={(e) => handleStatusChange(order.id, Number(e.target.value))}
                                     disabled={
@@ -155,7 +157,7 @@ const Orders = () => {
 
                                 </select>
                             </label>
-                            <button 
+                            <button className='butt-order' 
                                 onClick={() => updateStatus(order.id)} 
                                 style={{ marginLeft: '10px' }} 
                                 disabled={
