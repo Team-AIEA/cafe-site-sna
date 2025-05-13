@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import EditableMenuItem from './EditableMenuItem';
 
 const RestaurantsItem = () => {
     const [restaurants, setRestaurants] = useState(null);
@@ -63,9 +64,17 @@ const RestaurantsItem = () => {
                                 <p><em>Menu:</em></p>
                                 <ul>
                                     {restaurant.items.map((item) => (
-                                        <li key={item.id}>
-                                            <strong>{item.name}</strong> — {item.description} — ${item.price}
-                                        </li>
+                                        <EditableMenuItem
+                                            key={item.id}
+                                            id={item.id}
+                                            name={item.name}
+                                            price={item.price}
+                                            img={item.img}
+                                            onAddToCart={console.log("ops")}
+                                            val={item.price}
+                                            description={item.description}
+                                            available={item.available}
+                                        />
                                     ))}
                                 </ul>
                             </>
