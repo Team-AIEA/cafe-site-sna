@@ -253,12 +253,12 @@ def order(order_id):
 @app.route('/api/order/', methods=['POST'])
 def orderNew():
     data = request.get_json()
-    print(request.get_json())
+    print('Data:', data)
     try:
         restaurant_id = int(data.get('restaurant_id'))
         table_id = int(data.get('table_id'))
         items = data.get('items', {})  # Expecting a dictionary {"item_id": quantity}
-
+        print('Items:', items)
         print(items,'\n',isinstance(items, dict), all(isinstance(v, int) for v in items.values()))
         if not isinstance(items, dict) or not all(isinstance(v, int) for v in items.values()):
             return jsonify({'error': 'Invalid items format. Expected a dictionary of {"item_id": quantity}'}), 400
