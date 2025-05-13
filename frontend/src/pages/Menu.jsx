@@ -10,10 +10,10 @@ function Menu() {
     const restaurant_id = queryParams.get('restaurant');
     
   const [items, setItems] = useState([]);
-    const [cart, setCart] = useState(() => {
-        // Load cart from localStorage
-        const savedCart = localStorage.getItem('cart');
-        return savedCart ? JSON.parse(savedCart) : {};
+  const [cart, setCart] = useState(() => {
+          // Load cart from localStorage
+          const savedCart = localStorage.getItem('cart');
+          return savedCart ? JSON.parse(savedCart) : {};
     });
 
     useEffect(() => {

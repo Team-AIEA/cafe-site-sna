@@ -61,6 +61,7 @@ class Order(db.Model):
     table_id = db.Column(db.Integer, nullable=False)
     order_number = db.Column(db.Integer, nullable=False)
     items = db.Column(JSON, nullable=True)  # { "item_id": quantity, ... }
+    total_cost = db.Column(db.Integer, nullable=False)
     restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurant.id'), nullable=False)
 
 # 🛍️ Item
@@ -116,6 +117,7 @@ def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         auth_header = request.headers.get('Authorization')
+        print("Request:", request.headers)
         print("Authorization header:", auth_header)
         if not auth_header or not auth_header.startswith('Bearer '):
             print("Not an admin 1")
@@ -202,7 +204,6 @@ def signup():
 @app.route('/api/orders', methods=['GET'])
 @admin_required
 def list_orders():
-    print("Hi!")
     orders = Order.query.all()
     return jsonify({'orders': [
         {
@@ -215,7 +216,7 @@ def list_orders():
     ]}), 200
 
 
-@app.route('/api/order/<int:order_id>', methods=['GET', 'POST', 'PUT'])
+@app.route('/api/order/<int:order_id>', methods=['GET', 'PUT'])
 def order(order_id):
     if request.method == 'GET':
         order = Order.query.get(order_id)
@@ -230,24 +231,9 @@ def order(order_id):
             'restaurant_id': order.restaurant_id
         })
 
-    # elif request.method == 'POST':
-    #     data = request.get_json()
-    #     try:
-    #         table_id = int(data.get('table_id'))
-    #         order_number = int(data.get('order_number'))
-    #         status = int(data.get('status', 0))  # Default to 0 = order placed
-    #         items = data.get('items', {})
-    #     except (TypeError, ValueError):
-    #         return jsonify({'error': 'Invalid input'}), 400
-
-    #     new_order = Order(table_id=table_id, order_number=order_number, status=status, items=items, restaurant_id=data.get('restaurant_id'))  # Update restaurant_id as needed
-    #     db.session.add(new_order)
-    #     db.session.commit()
-    #     return jsonify({'message': 'Order created', 'id': new_order.id}), 201
-
     elif request.method == 'PUT':
         if not current_user.is_authenticated:
-            return jsonify({'error': 'Unauthorized'}), 401
+            return jsonify({'error': 'Unauthorized'}), 403
 
         order = Order.query.get(order_id)
         if not order:
@@ -281,7 +267,10 @@ def orderNew():
         order_number = int(datetime.now().timestamp())
         status = 0  # Default to 0 = order placed
 
+        total_cost = sum(item.price * quantity for item_id, quantity in items.items() for item in Item.query.filter_by(id=item_id))
+
         new_order = Order(
+            total_cost=total_cost,
             table_id=table_id,
             order_number=order_number,
             status=status,
