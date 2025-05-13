@@ -19,8 +19,8 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 # Enable CORS for the Flask app
-CORS(app, resources={r"/*": {"origins": ["http://localhost:5173", "38.244.138.103:22594"]}}) #TODO: change to production domain
-
+CORS(app, resources={r"/*": {"origins": ["http://localhost:5173", "http://38.244.138.103:22594"]}}, supports_credentials=True) #TODO: change to production domain
+# CORS(app, resources={r"/api/*": {"origins": ["http://localhost:5173"]}}, supports_credentials=True)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
 db = SQLAlchemy(app)
 
@@ -480,9 +480,13 @@ def handle_restaurants():
 
     elif request.method == 'POST':
         # Add a new restaurant (Admin-only access)
-        if not current_user.is_authenticated or not isinstance(current_user, AdminUser):
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
             return jsonify({'error': 'Admin access required'}), 403
-
+        token = auth_header.replace('Bearer ', '')
+        user = validate_token(token)
+        if not user or not isinstance(user, AdminUser):
+            return jsonify({'error': 'Admin access required'}), 403
         data = request.get_json()
         try:
             new_restaurant = Restaurant(
@@ -514,9 +518,14 @@ def update_restaurant(restaurant_id):
             'description': restaurant.description,
             'items': [item.to_dict() for item in restaurant.items]
         })
-    if request.method == 'PUT':
+    elif request.method == 'PUT':
         # Admin-only access
-        if not current_user.is_authenticated or not isinstance(current_user, AdminUser):
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
+            return jsonify({'error': 'Admin access required'}), 403
+        token = auth_header.replace('Bearer ', '')
+        user = validate_token(token)
+        if not user or not isinstance(user, AdminUser):
             return jsonify({'error': 'Admin access required'}), 403
         # Update an existing restaurant
         restaurant = Restaurant.query.get(restaurant_id)
