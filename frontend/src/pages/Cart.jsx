@@ -105,12 +105,13 @@ function Cart() {
             <a href="/"><img className='butt-up' src='../src/assets/back.png' /></a>
             <h1>Cart</h1>
             <div className="cart-items">
-                <ul>
+            <p>Table: {}</p>
+                <ul className='items-list'>
                     {Object.entries(cart).map(([itemId, item]) => {
                         const info = itemsInfo[itemId];
                         return (
                             <li key={itemId}>
-                                {info ? `${info.name} – ${"$" + info.price} – ${cart[itemId]} – ${"$" + info.price * cart[itemId]}` : 'Loading...'}
+                                {info ? `${info.name} — ${cart[itemId]} x ${"$" + info.price} = ${"$" + info.price * cart[itemId]}` : 'Loading...'}
                             </li>
                         );
                     })}

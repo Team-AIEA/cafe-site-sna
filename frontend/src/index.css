@@ -71,3 +71,61 @@ li {
   text-align: center;
   
 }
+
+.items-list {
+  background-color: white;
+  color: #3F7D58;
+  border-radius: 7px;
+}
+
+.status-created {
+  border-radius: 7px;
+  border-color:#3F7D58;
+  border-style: solid;
+  color: white;
+  width: 100%;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  font-weight: bold;
+
+  background-color: #EF9651;
+}
+
+.status-cooking {
+  border-radius: 7px;
+  border-color:#EF9651;
+  border-style: solid;
+  color:#EF9651;
+  width: 100%;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  font-weight: bold;
+
+  background-color: white;
+}
+
+.status-done {
+  border-radius: 7px;
+  border-color:white;
+  border-style: solid;
+  color: white;
+  width: 100%;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  font-weight: bold;
+
+  background-color:#3F7D58;
+}
+
+.status-cancelled {
+  border-radius: 7px;
+  border-color:white;
+  border-style: solid;
+  color: white;
+  width: 100%;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  font-weight: bold;
+
+  background-color: #EC5228;
+}

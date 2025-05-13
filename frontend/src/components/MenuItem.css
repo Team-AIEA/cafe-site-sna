@@ -34,3 +34,44 @@
     padding-left: 10px;
     padding-right: 10px;
 }
+
+.butt-amount {
+    display: inline-block;
+    color: #3F7D58;
+    background-color: white;
+    font-weight: bold;
+    border: none;
+    border-radius: 7px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.butt-min {
+    display: inline-block;
+    background-color: white;
+    color: #EC5228;
+    font-weight: bold;
+    border: none;
+    border-radius: 7px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.butt-plus {
+    display: inline-block;
+    background-color: white;
+    color: #3F7D58;
+    font-weight: bold;
+    border: none;
+    border-radius: 7px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
