@@ -105,7 +105,7 @@ function Cart() {
             <a href="/"><img className='butt-up' src='../src/assets/back.png' /></a>
             <h1>Cart</h1>
             <div className="cart-items">
-            <p>Table: {}</p>
+            <p><strong>Table:</strong> {localStorage.getItem('table_id')}</p>
                 <ul className='items-list'>
                     {Object.entries(cart).map(([itemId, item]) => {
                         const info = itemsInfo[itemId];

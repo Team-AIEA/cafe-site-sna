@@ -56,7 +56,7 @@ function Order() {
     if (!order) {
         return <div>Loading...</div>;
     }
-
+    console.log(order.status);
     return (
         <div className='cart-main'>
             <a href="/"><img className='butt-up' src='../src/assets/back.png' /></a>
@@ -66,7 +66,7 @@ function Order() {
             {/* <p><strong>Status:</strong> {order.status}</p> */}
             <p><strong>Table ID:</strong> {order.table_id}</p>
             {/* <p><strong>Order Number:</strong> {order.order_number}</p> */}
-            <p><strong>Restaurant ID:</strong> {order.restaurant_id}</p>
+            {/* <p><strong>Restaurant ID:</strong> {order.restaurant_id}</p> */}
             <p><strong>Restaurant:</strong> {restaurant?.name || 'Loading...'} - {restaurant?.address || 'Loading...'} {restaurant?.working_hours || 'Loading...'} {restaurant?.description || 'Loading...'} {restaurant?.contact_info || 'Loading...'}</p>
             <h2>Items</h2>
             <ul className='items-list'>
@@ -77,10 +77,11 @@ function Order() {
                 ))}
 
             </ul>
-            </div>
+            
             {order.status == 0 ? (<div className='status-created'>Created</div>) : order.status == 1 ? (<div className='status-cooking'>Cooking</div>)
-            : order.status == 2 ? (<><div className='status-done'>Done</div><button onClick={deleteOrderFromLocalStorage}>New Order</button></>)
-             : (<><div className='status-cancelled'>Cancelled</div><button onClick={deleteOrderFromLocalStorage}>New Order</button></>)}
+            : order.status == 2 ? (<><div className='status-done'>Done</div><button className='butt-new' onClick={deleteOrderFromLocalStorage}>New Order</button></>)
+             : order.status == 3 ? (<><div className='status-cancelled'>Cancelled</div><button className='butt-new' onClick={deleteOrderFromLocalStorage}>New Order</button></>) : (<></>)}
+             </div>
         </div>
     );
 }

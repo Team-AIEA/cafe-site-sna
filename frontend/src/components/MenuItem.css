@@ -17,8 +17,8 @@
 }
 
 .menu-item-img {
-    width: 180px;
-    height: 180px;
+    width: 8rem;
+    height: 8rem;
     border-radius: 7px;
 }
 
@@ -26,20 +26,21 @@
     display: inline-block;
     background-color: #3F7D58;
     color: white;
-    font-weight: bold;
+    /* font-weight: bold; */
     border: none;
     border-radius: 7px;
     padding-top: 5px;
     padding-bottom: 5px;
     padding-left: 10px;
     padding-right: 10px;
+    font-size: large;
 }
 
 .butt-amount {
     display: inline-block;
     color: #3F7D58;
     background-color: white;
-    font-weight: bold;
+    /* font-weight: bold; */
     border: none;
     border-radius: 7px;
     padding-top: 5px;
@@ -48,6 +49,7 @@
     padding-right: 10px;
     margin-left: 10px;
     margin-right: 10px;
+    font-size: large;
 }
 
 .butt-min {
@@ -61,6 +63,7 @@
     padding-bottom: 5px;
     padding-left: 10px;
     padding-right: 10px;
+    font-size: large;
 }
 
 .butt-plus {
@@ -74,4 +77,5 @@
     padding-bottom: 5px;
     padding-left: 10px;
     padding-right: 10px;
+    font-size: large;
 }

@@ -56,6 +56,9 @@ function Menu() {
     function addToCart(itemId, inc){
         const updatedCart = { ...cart };
         updatedCart[itemId] = (updatedCart[itemId] || 0) + inc; // Increment quantity
+        if (updatedCart[itemId] <= 0) {
+            delete updatedCart[itemId];
+        }
         setCart(updatedCart);
         console.log("Set cart")
         localStorage.setItem('cart', JSON.stringify(updatedCart)); // Save cart to localStorage
