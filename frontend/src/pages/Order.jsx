@@ -25,7 +25,7 @@ function Order() {
         if (order_id !== null){
             
             // Fetch order details from the backend
-            fetch(`${API_BASE_URL}/api/orders`, {
+            fetch(`${API_BASE_URL}/api/order/${order_id}`, {
                 method: 'GET',
             })
                 .then((response) => {
