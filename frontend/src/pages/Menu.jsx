@@ -6,9 +6,9 @@ function Menu() {
     const navigate = useNavigate();
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
-    const table_id = queryParams.get('table');
-    const restaurant_id = queryParams.get('restaurant');
-    
+    const [table_id, setTable] = useState(queryParams.get('table'));
+    const [restaurant_id, setRestaurant] = useState(queryParams.get('restaurant'));
+
   const [items, setItems] = useState([]);
   const [cart, setCart] = useState(() => {
           // Load cart from localStorage
@@ -36,41 +36,22 @@ function Menu() {
                 console.error('Error:', error);
             });
     }, []);
-
-    function placeOrder(){
-        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
-        const token = localStorage.getItem('access_token');
-        const aboba = localStorage.getItem('cart');
-        console.log(aboba)
-        if (!token) {
-            console.log('You must be logged in to place an order.');
-        }
     
-        fetch(`${API_BASE_URL}/api/order/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ table_id, restaurant_id, items: cart }),
-        })
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error('Failed to place order');
-                }
-                return response.json();
-            })
-            .then((data) => {
-                console.log('Order placed successfully!');
-                localStorage.setItem('order_id', data.id);
-                setCart({}); // Clear cart
-                localStorage.removeItem('cart'); // Remove cart from localStorage
-                navigate(`/order/${data.id}`); // Redirect to order details page using order ID
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-                alert('Failed to place order. Please try again.');
-            });
-    }
+    useEffect(() => {
+        if (table_id) {
+            localStorage.setItem('table_id', table_id);
+        }
+        else {
+            setTable(localStorage.getItem('table_id'));
+        }
+        if (restaurant_id) {
+            localStorage.setItem('restaurant_id', restaurant_id);
+        }
+        else {
+            setRestaurant(localStorage.getItem('restaurant_id'));
+        }
+
+  }, [table_id, restaurant_id]);
 
     function addToCart(itemId, inc){
         const updatedCart = { ...cart };
@@ -92,9 +73,9 @@ function Menu() {
                 {items.map((item) => (
                     <MenuItem id={item.id} name={item.name} price={item.price} onAddToCart={addToCart} img={item.src} val={getItems(item.id)}/>
                 ))}
-            <button onClick={placeOrder} disabled={Object.keys(cart).length === 0}>
+            {/* <button onClick={placeOrder} disabled={Object.keys(cart).length === 0}>
                 Place Order
-            </button>
+            </button> */}
         </div>
         </div>
     );
