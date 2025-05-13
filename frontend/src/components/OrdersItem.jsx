@@ -109,7 +109,7 @@ const Orders = () => {
             <div style={{ marginBottom: '1rem' }}>
                 <label>
                     Filter by Restaurant:
-                    <select value={selectedRestaurant} onChange={(e) => setSelectedRestaurant(e.target.value)}>
+                    <select className='filter' value={selectedRestaurant} onChange={(e) => setSelectedRestaurant(e.target.value)}>
                         <option value="">All Restaurants</option>
                         {orders && [...new Set(orders.map(order => order.restaurant_id))].map(id => (
                             <option key={id} value={id}>Restaurant #{id}</option>
@@ -118,15 +118,15 @@ const Orders = () => {
                 </label>
             </div>
 
-            <ul>
+            <ul className='menu-div'>
                 {orders
                     .filter(order => selectedRestaurant === '' || order.restaurant_id === Number(selectedRestaurant))
                     .map((order) => (
 
                     <li key={order.id} className='cart-items'>
                         <strong>
-                            Order #{order.id}: {STATUS_OPTIONS[order.status]?.label || 'Unknown'} — Table {order.table_id} — Order Number {order.order_number} - {order.restaurant_id} - {order.total_cost}$
-                        </strong>
+                            Order #{order.id}</strong><br/>{STATUS_OPTIONS[order.status]?.label || 'Unknown'} — Restaurant {order.restaurant_id} — Table {order.table_id} — Order Number {order.order_number} — {order.total_cost}$
+                        
                         <br />  
                         <div className='items-list'>
                         {Array.isArray(order.items) ? (
