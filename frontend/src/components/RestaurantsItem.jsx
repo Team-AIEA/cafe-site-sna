@@ -115,6 +115,7 @@ const RestaurantsItem = () => {
     return (
         <>
             <h1>Restaurants</h1>
+            <div className='nothing'></div>
             <ul className='rest-list'>
                 {restaurants.map((restaurant) => (
                     <li className='cart-items' id='restaurants' key={restaurant.id}>
@@ -132,29 +133,34 @@ const RestaurantsItem = () => {
                                     value={restaurant.name}
                                     onChange={(e) => handleInputChange(e, 'name', restaurant.id)}
                                     placeholder="Name"
+                                    className="menu-item-description"
                                 />
                                 <input
                                     type="text"
                                     value={restaurant.address}
                                     onChange={(e) => handleInputChange(e, 'address', restaurant.id)}
                                     placeholder="Address"
+                                    className="menu-item-description"
                                 />
                                 <input
                                     type="text"
                                     value={restaurant.working_hours}
                                     onChange={(e) => handleInputChange(e, 'working_hours', restaurant.id)}
                                     placeholder="Working Hours"
+                                    className="menu-item-description"
                                 />
                                 <input
                                     type="text"
                                     value={restaurant.contact_info}
                                     onChange={(e) => handleInputChange(e, 'contact_info', restaurant.id)}
                                     placeholder="Contact Info"
+                                    className="menu-item-description"
                                 />
                                 <textarea
                                     value={restaurant.description}
                                     onChange={(e) => handleInputChange(e, 'description', restaurant.id)}
                                     placeholder="Description"
+                                    className="menu-item-description"
                                 />
                                 <button className='butt-order' id='save' onClick={() => saveRestaurantChanges(restaurant)}>Save</button>
                             </div>

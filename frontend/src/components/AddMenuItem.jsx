@@ -66,12 +66,13 @@ const handleAdd = async () => {
 
 
     return (
-        <div className="menu-item new-item">
+        <div className="menu-item" id="edit">
             <input
                 placeholder="Name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="menu-item-name"
+                id="edit"
             />
             <input
                 placeholder="Description"
@@ -83,7 +84,7 @@ const handleAdd = async () => {
                 placeholder="Image"
                 value={src}
                 onChange={(e) => setSrc(e.target.value)}
-                className="menu-item-image"
+                className="menu-item-description"
             />
             <input
                 placeholder="Price"
@@ -91,18 +92,20 @@ const handleAdd = async () => {
                 step="0.01"
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
-                className="menu-item-price"
+                className="menu-item-description"
+                id="edit"
             />
             <label>
+                Available
                 <input
                     type="checkbox"
                     checked={available}
                     onChange={(e) => setAvailable(e.target.checked)}
                     className="menu-item-availability"
                 />
-                Available
-            </label>
-            <button onClick={handleAdd}>Add Item</button>
+                {/* Available */}
+            </label><br/>
+            <button className="butt-order" onClick={handleAdd}>Add Item</button>
         </div>
     );
 };

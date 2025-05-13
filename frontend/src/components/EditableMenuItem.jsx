@@ -77,7 +77,7 @@ const EditableMenuItem = ({ id, name, price, img, description, available }) => {
                 onChange={onAvailabilityChange}
             />
             <input
-                className="menu-item-price"
+                className="menu-item-description"
                 value={localPrice}
                 onChange={onPriceChange}
                 type="number"

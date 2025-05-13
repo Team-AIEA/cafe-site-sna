@@ -156,3 +156,7 @@ li {
   padding-top: 10px;
   padding-bottom: 10px;
 }
+
+.nothing {
+  height: 45px;
+}

@@ -13,6 +13,7 @@
 .menu-item#edit {
     border-style: solid;
     background-color: white;
+    min-width: 270px
 }
 
 .menu-item-name {
@@ -45,6 +46,12 @@
     padding-left: 10px;
     padding-right: 10px;
     font-size: large;
+}
+
+.menu-item-price#edit {
+    color:#3F7D58;
+    border-style: solid;
+    border-color: #3F7D58;
 }
 
 .butt-amount {
