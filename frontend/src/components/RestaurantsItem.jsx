@@ -6,10 +6,7 @@ const RestaurantsItem = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        console.log("HI!!!! ");
         const token = localStorage.getItem('access_token');
-        console.log("Token:", token);
-        
         if (!token) {
             console.log('No token found, redirecting to login');
             navigate('/login', { replace: true });
@@ -26,8 +23,12 @@ const RestaurantsItem = () => {
         })
             .then((response) => {
                 console.log("Response:", response);
-                if (!response.ok) {
-                    throw new Error('Failed to fetch restaurants');
+                if (response.status === 401 || response.status === 403) {
+                    navigate('/login', { replace: true });
+                } else if (!response.ok){
+                    console.log("Response status:", response.status);
+                    console.log("Response status text:", response.statusText);
+                     throw new Error('Failed to fetch user details');
                 }
                 return response.json();
             })
