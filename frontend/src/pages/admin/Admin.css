@@ -127,3 +127,13 @@ label {
 .butt-order#save {
     margin-left: 10px;
 }
+
+.div-add {
+    max-width: 93%;
+}
+
+.status-cancelled#logout {
+    position: absolute;
+    top: 20px; /* Distance from bottom */
+  left: 20px; /* Distance from right */
+}
