@@ -545,7 +545,7 @@ def add_sample_user():
     db.session.add(new_user)
     a = [{
         'name': 'Pizza',
-        'src': "https://www.hollywoodreporter.com/wp-content/uploads/2012/12/img_logo_blue.jpg?w=1440&h=810&crop=1"
+        'src': "https://plus.unsplash.com/premium_photo-1668771085743-1d2d19818140?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTN8fHBpenphfGVufDB8fDB8fHww"
     },
     {
         'name': 'Burger',
