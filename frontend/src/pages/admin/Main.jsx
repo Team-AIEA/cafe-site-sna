@@ -142,9 +142,10 @@ function Main() {
 
             {superuser && (
                 <div className="admin-form">
-                    <h2>Create New Admin</h2>
+                    <h1>Create New Admin</h1>
                     <form onSubmit={handleCreateAdmin}>
                         <input
+                            className='menu-item-description'
                             type="text"
                             name="username"
                             placeholder="Username"
@@ -153,6 +154,7 @@ function Main() {
                             required
                         />
                         <input
+                            className='menu-item-description'
                             type="password"
                             name="password"
                             placeholder="Password"
@@ -161,6 +163,8 @@ function Main() {
                             required
                         />
                         <select
+                            className='filter'
+                            id='rest'
                             name="restaurant_id"
                             value={newAdmin.restaurant_id}
                             onChange={handleInputChange}
@@ -173,9 +177,11 @@ function Main() {
                                 </option>
                             ))}
                         </select>
-
-                        <label>
+                        <div  id='superuser'><label>
+                        <br/>Superuser</label>
+                        
                             <input
+                                className='menu-item-availability'
                                 type="checkbox"
                                 name="superuser"
                                 checked={newAdmin.superuser || false}
@@ -183,10 +189,8 @@ function Main() {
                                     setNewAdmin({ ...newAdmin, superuser: e.target.checked })
                                 }
                             />
-                            Superuser
-                        </label>
-
-                        <button type="submit">Add Admin</button>
+                        <button className='butt-order' id="save"type="submit">Add Admin</button>
+                        </div>
                     </form>
                     {message && <p className="status-msg">{message}</p>}
                 </div>

@@ -137,3 +137,16 @@ label {
     top: 20px; /* Distance from bottom */
   left: 20px; /* Distance from right */
 }
+
+.admin-form {
+    margin-left: 30%;
+    margin-right: 30%;
+}
+
+select.filter#rest {
+    margin-left: 0;
+}
+
+div#superuser {
+    text-align: center;
+}
