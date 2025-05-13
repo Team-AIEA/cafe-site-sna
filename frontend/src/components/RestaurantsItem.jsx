@@ -51,15 +51,32 @@ const RestaurantsItem = () => {
             <h1>Restaurants</h1>
             <ul>
                 {restaurants.map((restaurant) => (
-                    <li key={restaurant.id}>
+                    <li key={restaurant.id} style={{ marginBottom: '1.5rem' }}>
                         <strong>
                             Restaurant #{restaurant.id}: {restaurant.name} — {restaurant.address} — {restaurant.working_hours} — {restaurant.contact_info}
                         </strong>
+                        <p>{restaurant.description}</p>
+
+                        {restaurant.items && restaurant.items.length > 0 ? (
+                            <>
+                                <p><em>Menu:</em></p>
+                                <ul>
+                                    {restaurant.items.map((item) => (
+                                        <li key={item.id}>
+                                            <strong>{item.name}</strong> — {item.description} — ${item.price}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </>
+                        ) : (
+                            <p><em>No items listed for this restaurant.</em></p>
+                        )}
                     </li>
                 ))}
             </ul>
         </>
     );
+
 }
 
 export default RestaurantsItem;

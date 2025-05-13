@@ -54,6 +54,17 @@ class Restaurant(db.Model):
     orders = db.relationship('Order', backref='restaurant', lazy=True)
     admins = db.relationship('AdminUser', backref='restaurant', lazy=True)
 
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'address': self.address,
+            'working_hours': self.working_hours,
+            'contact_info': self.contact_info,
+            'description': self.description,
+            'items': [item.to_dict() for item in self.items]
+        }
+
 # 📦 Order
 class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -73,6 +84,16 @@ class Item(db.Model):
     price = db.Column(db.Integer, nullable=False)
     available = db.Column(db.Boolean, default=True)
     restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurant.id'), nullable=False)
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'price': self.price,
+            'src': self.src,
+            'description': self.description,
+            'available': self.available,
+            'restaurant_id': self.restaurant_id
+        }
 
 class LowLevelItem():
     def __init__(self, item_id, quantity):
@@ -423,7 +444,7 @@ def handle_restaurants():
                 'description': r.description,
                 'items': r.items
             })
-
+        to_return = [r.to_dict() for r in restaurants]
         return jsonify(to_return), 200
 
     elif request.method == 'POST':
