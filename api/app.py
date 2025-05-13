@@ -385,7 +385,12 @@ def handle_items():
 
     elif request.method == 'POST':
         # Admin-only access
-        if not current_user.is_authenticated or not isinstance(current_user, AdminUser):
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
+            return jsonify({'error': 'Admin access required'}), 403
+        token = auth_header.replace('Bearer ', '')
+        user = validate_token(token)
+        if not user or not isinstance(user, AdminUser):
             return jsonify({'error': 'Admin access required'}), 403
         data = request.get_json()
         try:
@@ -419,8 +424,13 @@ def handle_item(item_id):
         })
 
     elif request.method == 'PUT':
-        if not current_user.is_authenticated:
-            return "Unauthorized", 401
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
+            return jsonify({'error': 'Admin access required'}), 403
+        token = auth_header.replace('Bearer ', '')
+        user = validate_token(token)
+        if not user or not isinstance(user, AdminUser):
+            return jsonify({'error': 'Admin access required'}), 403
         data = request.get_json()
         try:
             item.name = data.get('name', item.name)
@@ -434,8 +444,13 @@ def handle_item(item_id):
             return jsonify({'error': 'Invalid input'}), 400
 
     elif request.method == 'DELETE':
-        if not current_user.is_authenticated:
-            return "Unauthorized", 401
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
+            return jsonify({'error': 'Admin access required'}), 403
+        token = auth_header.replace('Bearer ', '')
+        user = validate_token(token)
+        if not user or not isinstance(user, AdminUser):
+            return jsonify({'error': 'Admin access required'}), 403
         db.session.delete(item)
         db.session.commit()
         return jsonify({'status': 'Deleted'})
