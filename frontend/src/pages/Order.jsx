@@ -67,9 +67,12 @@ function Order() {
             <p><strong>Restaurant ID:</strong> {order.restaurant_id}</p>
             <h2>Items</h2>
             <ul>
-                {Object.entries(order.items).map(([itemId, quantity]) => (
-                    <li key={itemId}>Item ID: {itemId}, Quantity: {quantity}</li>
+                {Object.entries(order.items).map(([itemId, item]) => (
+                    <li key={itemId}>
+                        {item.name} — {item.quantity} x {item.price}$ = {item.price * item.quantity}$
+                    </li>
                 ))}
+
             </ul>
             </div>
         </div>
