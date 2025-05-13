@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams} from 'react-router-dom';
 
 function Order() {
-    
+    const navigate = useNavigate();
+
     function deleteOrderFromLocalStorage() {
         localStorage.removeItem('order_id');
+        navigate(`/`);
     }
 
     const { id } = useParams(); // Get the order ID from the URL
@@ -54,19 +56,20 @@ function Order() {
     if (!order) {
         return <div>Loading...</div>;
     }
-
+    console.log(order.status);
     return (
         <div className='cart-main'>
+            <a href="/"><img className='butt-up' src='../src/assets/back.png' /></a>
             <h1>Order Details</h1>
             <div className='cart-items'>
             <p><strong>Order ID:</strong> {order.id}</p>
             {/* <p><strong>Status:</strong> {order.status}</p> */}
             <p><strong>Table ID:</strong> {order.table_id}</p>
             {/* <p><strong>Order Number:</strong> {order.order_number}</p> */}
-            <p><strong>Restaurant ID:</strong> {order.restaurant_id}</p>
+            {/* <p><strong>Restaurant ID:</strong> {order.restaurant_id}</p> */}
             <p><strong>Restaurant:</strong> {restaurant?.name || 'Loading...'} - {restaurant?.address || 'Loading...'} {restaurant?.working_hours || 'Loading...'} {restaurant?.description || 'Loading...'} {restaurant?.contact_info || 'Loading...'}</p>
             <h2>Items</h2>
-            <ul>
+            <ul className='items-list'>
                 {Object.entries(order.items).map(([itemId, item]) => (
                     <li key={itemId}>
                         {item.name} — {item.quantity} x {item.price}$ = {item.price * item.quantity}$
@@ -74,7 +77,11 @@ function Order() {
                 ))}
 
             </ul>
-            </div>
+            
+            {order.status == 0 ? (<div className='status-created'>Created</div>) : order.status == 1 ? (<div className='status-cooking'>Cooking</div>)
+            : order.status == 2 ? (<><div className='status-done'>Done</div><button className='butt-new' onClick={deleteOrderFromLocalStorage}>New Order</button></>)
+             : order.status == 3 ? (<><div className='status-cancelled'>Cancelled</div><button className='butt-new' onClick={deleteOrderFromLocalStorage}>New Order</button></>) : (<></>)}
+             </div>
         </div>
     );
 }

@@ -1,11 +1,8 @@
 :root {
   background-color: #EFEFEF;
-  font-family: "Noto Serif", serif;
+  font-family: "Onest", sans-serif;
   font-optical-sizing: auto;
-  font-weight: 400;
   font-style: normal;
-  font-variation-settings:
-    "wdth" 100;
 }
 
 h1 {
@@ -19,7 +16,7 @@ h1 {
 .menu-div {
   display:flex;
   flex-wrap: wrap;
-  gap: 10%;
+  gap: 5%;
 }
 
 .butt-down {
@@ -58,16 +55,98 @@ li {
   display: inline-block;
   background-color: #3F7D58;
   color: white;
-  font-weight: bold;
+  /* font-weight: bold; */
   border: none;
   border-radius: 7px;
   padding-top: 5px;
   padding-bottom: 5px;
   padding-left: 10px;
   padding-right: 10px;
+
+  font-size: large;
 }
 
 .cart-main {
   text-align: center;
   
+}
+
+.items-list {
+  background-color: white;
+  color: #3F7D58;
+  border-radius: 7px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.status-created {
+  border-radius: 7px;
+  border-color:white;
+  border-style: solid;
+  color: white;
+  /* width: 95%; */
+  padding-top: 10px;
+  padding-bottom: 10px;
+  font-weight: bold;
+
+  background-color: #EF9651;
+}
+
+.status-cooking {
+  border-radius: 7px;
+  border-color:#EF9651;
+  border-style: solid;
+  color:#EF9651;
+  /* width: 100%; */
+  padding-top: 10px;
+  padding-bottom: 10px;
+  font-weight: bold;
+  font-size: large;
+
+  background-color: white;
+}
+
+.status-done {
+  border-radius: 7px;
+  border-color:white;
+  border-style: solid;
+  color: white;
+  /* width: 100%; */
+  padding-top: 10px;
+  padding-bottom: 10px;
+  font-weight: bold;
+  font-size: large;
+
+  background-color:#3F7D58;
+}
+
+.status-cancelled {
+  border-radius: 7px;
+  border-color:white;
+  border-style: solid;
+  color: white;
+  /* width: 100%; */
+  padding-top: 10px;
+  padding-bottom: 10px;
+  font-weight: bold;
+  font-size: large;
+
+  background-color: #EC5228;
+}
+
+.butt-new {
+  border-radius: 7px;
+  border-color:#3F7D58;
+  border-style: solid;
+  color:#3F7D58;
+  /* width: 100%; */
+  padding-top: 10px;
+  padding-bottom: 10px;
+  font-weight: bold;
+  font-size: large;
+  margin-top: 10px;
+  padding-left: 10px;
+  padding-right: 10px;
+
+  background-color: white;
 }
