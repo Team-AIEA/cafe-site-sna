@@ -30,15 +30,17 @@ class AdminUser(UserMixin, db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     password_hash = db.Column(db.String(256), nullable=False)
     restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurant.id'), nullable=False)
+    superuser = db.Column(db.Boolean, default=False)  # 🔥 New field!
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
-    
+
     def get_id(self):
         return str(self.id)
+
 
 # 🍽️ Restaurant
 class Restaurant(db.Model):
@@ -233,16 +235,15 @@ def signup():
     if not restaurant:
         return jsonify({'error': 'Invalid restaurant_id. Restaurant does not exist.'}), 400
 
-    # Create a new AdminUser
-    new_user = AdminUser(
+    new_admin = AdminUser(
         username=data['username'],
-        restaurant_id=data['restaurant_id']
+        restaurant_id=data['restaurant_id'],
+        superuser=data.get('superuser', False)  # Default to False if not passed
     )
-    new_user.set_password(data['password'])
-
-    # Save the new user to the database
-    db.session.add(new_user)
+    new_admin.set_password(data['password'])
+    db.session.add(new_admin)
     db.session.commit()
+
 
     return jsonify({'message': 'User created successfully'}), 201
 
@@ -460,14 +461,9 @@ def handle_item(item_id):
 @app.route('/api/user', methods=['GET'])
 @admin_required
 def get_user():
-    print(1)
-    print(current_user)
-    # if not current_user.is_authenticated:
-    #     print('No token found, redirecting to login')
-    #     return jsonify({'error': 'Unauthorized'}), 401
-    print(2)
     return jsonify({
         'id': current_user.id,
+        'superuser': current_user.superuser,
         'username': current_user.username
     }), 200
 
@@ -552,7 +548,8 @@ def add_sample_user():
     # Create a sample user
     new_user = AdminUser(
         username="admin",
-        restaurant_id=0
+        restaurant_id=0,
+        superuser=True  # Set to True for superuser
     )
     new_user.set_password("admin")
 

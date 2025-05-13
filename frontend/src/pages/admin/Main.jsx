@@ -10,12 +10,13 @@ function Main() {
         username: '',
         password: '',
         restaurant_id: '',
+        superuser: false,
     });
     const [message, setMessage] = useState(null);
     const navigate = useNavigate();
     const [restaurants, setRestaurants] = useState([]);
-
-   useEffect(() => {
+    const [superuser, setSuperuser] = useState(false);
+    useEffect(() => {
         const token = localStorage.getItem('access_token');
         if (!token) {
             navigate('/login', { replace: true });
@@ -41,6 +42,7 @@ function Main() {
             })
             .then((data) => {
                 setUsername(data.username);
+                setSuperuser(data.superuser);
             })
             .catch((error) => {
                 console.error('Error:', error);
@@ -102,13 +104,14 @@ function Main() {
                 username: newAdmin.username,
                 password: newAdmin.password,
                 restaurant_id: parseInt(newAdmin.restaurant_id),
+                superuser: newAdmin.superuser,
             }),
         })
         .then((res) => res.json().then(data => ({ status: res.status, data })))
         .then(({ status, data }) => {
             if (status === 201) {
                 setMessage("✅ Admin created successfully!");
-                setNewAdmin({ username: '', password: '', restaurant_id: '' });
+                setNewAdmin({ username: '', password: '', restaurant_id: '', superuser: false });
             } else {
                 setMessage(`❌ Error: ${data.error}`);
             }
@@ -124,7 +127,7 @@ function Main() {
     return (
         <>
             <div className="header">
-                <h1>Hi {username}!</h1>
+                <h1>Hi {username}! {superuser && '👑'}</h1>
                 <button className="logout-btn" onClick={handleLogout}>Logout</button>
             </div>
 
@@ -137,43 +140,58 @@ function Main() {
                 </div>
             </div>
 
-            <div className="admin-form">
-                <h2>Create New Admin</h2>
-                <form onSubmit={handleCreateAdmin}>
-                    <input
-                        type="text"
-                        name="username"
-                        placeholder="Username"
-                        value={newAdmin.username}
-                        onChange={handleInputChange}
-                        required
-                    />
-                    <input
-                        type="password"
-                        name="password"
-                        placeholder="Password"
-                        value={newAdmin.password}
-                        onChange={handleInputChange}
-                        required
-                    />
-                    <select
-                        name="restaurant_id"
-                        value={newAdmin.restaurant_id}
-                        onChange={handleInputChange}
-                        required
-                    >
-                        <option value="">Select a Restaurant</option>
-                        {restaurants.map((restaurant) => (
-                            <option key={restaurant.id} value={restaurant.id}>
-                                {restaurant.name ? restaurant.name : `Restaurant #${restaurant.id}`}
-                            </option>
-                        ))}
-                    </select>
+            {superuser && (
+                <div className="admin-form">
+                    <h2>Create New Admin</h2>
+                    <form onSubmit={handleCreateAdmin}>
+                        <input
+                            type="text"
+                            name="username"
+                            placeholder="Username"
+                            value={newAdmin.username}
+                            onChange={handleInputChange}
+                            required
+                        />
+                        <input
+                            type="password"
+                            name="password"
+                            placeholder="Password"
+                            value={newAdmin.password}
+                            onChange={handleInputChange}
+                            required
+                        />
+                        <select
+                            name="restaurant_id"
+                            value={newAdmin.restaurant_id}
+                            onChange={handleInputChange}
+                            required
+                        >
+                            <option value="">Select a Restaurant</option>
+                            {restaurants.map((restaurant) => (
+                                <option key={restaurant.id} value={restaurant.id}>
+                                    {restaurant.name ? restaurant.name : `Restaurant #${restaurant.id}`}
+                                </option>
+                            ))}
+                        </select>
 
-                    <button type="submit">Add Admin</button>
-                </form>
-                {message && <p className="status-msg">{message}</p>}
-            </div>
+                        <label>
+                            <input
+                                type="checkbox"
+                                name="superuser"
+                                checked={newAdmin.superuser || false}
+                                onChange={(e) =>
+                                    setNewAdmin({ ...newAdmin, superuser: e.target.checked })
+                                }
+                            />
+                            Superuser
+                        </label>
+
+                        <button type="submit">Add Admin</button>
+                    </form>
+                    {message && <p className="status-msg">{message}</p>}
+                </div>
+            )}
+
         </>
     );
 }
