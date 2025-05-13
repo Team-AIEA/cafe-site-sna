@@ -57,8 +57,9 @@ function Order() {
     }
 
     return (
-        <div>
+        <div className='cart-main'>
             <h1>Order Details</h1>
+            <div className='cart-items'>
             <p><strong>Order ID:</strong> {order.id}</p>
             {/* <p><strong>Status:</strong> {order.status}</p> */}
             <p><strong>Table ID:</strong> {order.table_id}</p>
@@ -70,6 +71,7 @@ function Order() {
                     <li key={itemId}>Item ID: {itemId}, Quantity: {quantity}</li>
                 ))}
             </ul>
+            </div>
         </div>
     );
 }

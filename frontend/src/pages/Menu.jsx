@@ -37,19 +37,6 @@ function Menu() {
             });
     }, []);
 
-    function addToCart(itemId, inc){
-        const updatedCart = { ...cart };
-        updatedCart[itemId] = (updatedCart[itemId] || 0) + inc; // Increment quantity
-        setCart(updatedCart);
-        console.log("Set cart")
-        localStorage.setItem('cart', JSON.stringify(updatedCart)); // Save cart to localStorage
-    }
-    
-    function getItems(itemId){
-        return  cart[itemId];
-    }
-
-
     function placeOrder(){
         const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
         const token = localStorage.getItem('access_token');
@@ -58,7 +45,7 @@ function Menu() {
         if (!token) {
             console.log('You must be logged in to place an order.');
         }
-
+    
         fetch(`${API_BASE_URL}/api/order/`, {
             method: 'POST',
             headers: {
@@ -83,6 +70,18 @@ function Menu() {
                 console.error('Error:', error);
                 alert('Failed to place order. Please try again.');
             });
+    }
+
+    function addToCart(itemId, inc){
+        const updatedCart = { ...cart };
+        updatedCart[itemId] = (updatedCart[itemId] || 0) + inc; // Increment quantity
+        setCart(updatedCart);
+        console.log("Set cart")
+        localStorage.setItem('cart', JSON.stringify(updatedCart)); // Save cart to localStorage
+    }
+    
+    function getItems(itemId){
+        return  cart[itemId];
     }
 
     return (

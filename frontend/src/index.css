@@ -35,3 +35,39 @@ h1 {
   left: 20px; /* Distance from right */
   width: 50px;
 }
+
+.cart-items {
+  background-color: #EF9651;
+
+    width: 95%;
+    border-radius: 7px;
+
+    padding: 10px;
+    margin-bottom: 20px;
+
+    font-size: large;
+  
+  color: white;
+}
+
+li {
+  list-style-type: none;
+}
+
+.butt-order {
+  display: inline-block;
+  background-color: #3F7D58;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 7px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.cart-main {
+  text-align: center;
+  
+}
