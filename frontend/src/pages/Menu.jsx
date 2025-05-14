@@ -8,12 +8,12 @@ function Menu() {
     const queryParams = new URLSearchParams(location.search);
     const [table_id, setTable] = useState(queryParams.get('table'));
     const [restaurant_id, setRestaurant] = useState(queryParams.get('restaurant'));
-
-  const [items, setItems] = useState([]);
-  const [cart, setCart] = useState(() => {
-          // Load cart from localStorage
-          const savedCart = localStorage.getItem('cart');
-          return savedCart ? JSON.parse(savedCart) : {};
+    const [displaySign, setDisplaySign] = useState(false);
+    const [items, setItems] = useState([]);
+    const [cart, setCart] = useState(() => {
+            // Load cart from localStorage
+            const savedCart = localStorage.getItem('cart');
+            return savedCart ? JSON.parse(savedCart) : {};
     });
 
     useEffect(() => {
@@ -67,11 +67,24 @@ function Menu() {
     function getItems(itemId){
         return  cart[itemId];
     }
+    
+    useEffect(() => {
+        if (Object.keys(cart).length > 0) {
+            setDisplaySign(true);
+        } else {
+            if (localStorage.getItem('order_id')) {
+                setDisplaySign(true);
+            }
+            else {
+                setDisplaySign(false);
+            }
+        }
 
+    }, [cart]);
     return (
         <div>
             {localStorage.getItem('order_id') ? (<a href={`/order/${localStorage.getItem('order_id')}`}><img className='butt-down' src='../src/assets/order.png'></img></a>)
-             : (<a href="/cart"><img className='butt-down' src='../src/assets/cart.png'></img></a>)} 
+             : displaySign ? (<a href="/cart"><img className='butt-down' src='../src/assets/cart.png'></img></a>) : null}
         <h1>Food & Drinks</h1>
         <div className='menu-div'>         
                 {items.map((item) => (
