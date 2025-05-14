@@ -20,7 +20,6 @@ login_manager.init_app(app)
 
 # Enable CORS for the Flask app
 CORS(app, resources={r"/*": {"origins": ["http://localhost:5173", "http://38.244.138.103:22594"]}}, supports_credentials=True) #TODO: change to production domain
-# CORS(app, resources={r"/api/*": {"origins": ["http://localhost:5173"]}}, supports_credentials=True)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
 db = SQLAlchemy(app)
 
@@ -72,7 +71,7 @@ class Order(db.Model):
     status = db.Column(db.Integer, nullable=False)
     table_id = db.Column(db.Integer, nullable=False)
     order_number = db.Column(db.Integer, nullable=False)
-    items = db.Column(JSON, nullable=True)  # { "item_id": quantity, ... }
+    items = db.Column(JSON, nullable=True)
     total_cost = db.Column(db.Integer, nullable=False)
     restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurant.id'), nullable=False)
 
@@ -109,7 +108,8 @@ class LowLevelItem():
             self.available = item.available
             self.restaurant_id = item.restaurant_id
         except Exception as e:
-            print(f"Error initializing LowLevelItem: {e}")
+            # print(f"Error initializing LowLevelItem: {e}")
+            pass
     def to_dict(self):
         return {
             'id': self.id,
@@ -143,20 +143,15 @@ def generate_token(user_id):
 
 # Utility function to validate the token and retrieve the user
 def validate_token(token:str):
-    print("Validating token:", token)
     try:
         payload = jwt.decode(token, app.secret_key, algorithms=['HS256'])
-        print('Payload:', payload, 'Payload user id', payload['user_id'])
         user = AdminUser.query.get(payload['user_id'])
         if user:
-            print('User found:', user.username)
             return user
     except jwt.ExpiredSignatureError:
-        print("Token has expired")
-        return None  # Token has expired
+        return None
     except jwt.InvalidTokenError:
-        print("Invalid token")
-        return None  # Invalid token
+        return None
     return None
 
 
@@ -165,17 +160,13 @@ def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         auth_header = request.headers.get('Authorization')
-        print("Request:", request.headers)
-        print("Authorization header:", auth_header)
         if not auth_header or not auth_header.startswith('Bearer '):
-            print("Not an admin 1")
             return jsonify({'error': 'Admin access required'}), 403
 
         token = auth_header.replace('Bearer ', '')
 
         user = validate_token(token)
         if not user or not isinstance(user, AdminUser):
-            print("Not an admin 2")
             return jsonify({'error': 'Admin access required'}), 403
 
         login_user(user)
@@ -186,7 +177,7 @@ def admin_required(f):
 
 @app.route('/api/', methods=['GET'])
 def index():
-    add_sample_user()
+    add_sample_user() #TODO: remove in production!
     return "It's API page. No content here :("
 
 
@@ -200,13 +191,10 @@ def login():
     if user and user.check_password(data['password']):
         # Generate a token (e.g., JWT)
         token = generate_token(user.id)  # Replace with your token generation logic
-        print("Token generated:", token)
         login_user(user)  # sets current_user
-        print(current_user.is_authenticated)
 
         # Set the token in a secure cookie
         response = jsonify({'message': 'Logged in', 'token': token})
-        # response.set_cookie('access_token', token, httponly=True, secure=False)  #TODO: Use secure=True in production
         return response, 200
 
     return jsonify({'error': 'Invalid credentials'}), 401
@@ -222,7 +210,18 @@ def logout():
 @app.route('/api/signup', methods=['POST'])
 @admin_required
 def signup():
+    auth_header = request.headers.get('Authorization')
+    if not auth_header or not auth_header.startswith('Bearer '):
+        return jsonify({'error': 'Admin access required'}), 403
+    token = auth_header.replace('Bearer ', '')
+    user = validate_token(token)
+    if not user or not isinstance(user, AdminUser):
+        return jsonify({'error': 'Admin access required'}), 403
+    if not user.superuser:
+        return jsonify({'error': 'Admin super access required'}), 403
+        
     data = request.get_json()
+
     if not data or 'username' not in data or 'password' not in data or 'restaurant_id' not in data:
         return jsonify({'error': 'Invalid input. Username, password, and restaurant_id are required.'}), 400
 
@@ -295,34 +294,24 @@ def order(order_id):
 
         data = request.get_json()
         try:
+            if (not user.superuser and order.restaurant_id != user.restaurant_id):
+                return jsonify({'error': 'Admin super access required or edit only your restaurant orders'}), 403
             if 'status' in data:
-                print('Status:', data['status'])
-                print(int(data['status']) not in [0, 1, 2, 3])
                 if int(data['status']) not in [0, 1, 2, 3]:  # Assuming status can be 0 (placed), 1 (in progress), 2 (completed) or 3 (canceled)
                     return jsonify({'error': 'Invalid status value'}), 400
                 elif order.status == 3:
                     return jsonify({'error': 'Order already canceled'}), 400
                 elif order.status == 2:
                     return jsonify({'error': 'Order already completed'}), 400
-                elif order.status == 0 and int(data['status']) == 1:
-                    order.status = 1
-                elif order.status == 0 and int(data['status']) == 2:
-                    order.status = 2
-                elif order.status == 0 and int(data['status']) == 3:
-                    order.status = 3
-                elif order.status == 0 and int(data['status']) == 3:
-                    order.status = 3
+                elif order.status == 0 and int(data['status']) in [1,2,3]:
+                    order.status = int(data['status'])
                 elif order.status == 1 and int(data['status']) == 2:
-                    order.status = 2
-                elif order.status == 1 and int(data['status']) == 3:
-                    order.status = 3
-                elif order.status == 0 and int(data['status']) == 3:
+                    order.status = int(data['status'])
+                elif order.status in [0,1] and int(data['status']) == 3:
                     order.status = 3
                 else:
                     return jsonify({'error': 'Invalid status transition'}), 400
                 
-            # if 'items' in data:
-            #     order.items = data['items']
             db.session.commit()
             return jsonify({'message': 'Order updated'}), 200
         except (TypeError, ValueError):
@@ -331,7 +320,6 @@ def order(order_id):
 @app.route('/api/order/', methods=['POST'])
 def orderNew():
     data = request.get_json()
-    print('Data:', data)
     try:
         restaurant_id = int(data.get('restaurant_id'))
         table_id = int(data.get('table_id'))
@@ -402,6 +390,8 @@ def handle_items():
                 restaurant_id=data.get('restaurant_id'),
                 src=data.get('src', '')
             )
+            if (not user.superuser and new_item.restaurant_id != user.restaurant_id):
+                return jsonify({'error': 'Admin super access required or edit only your restaurant'}), 403
             db.session.add(new_item)
             db.session.commit()
             return jsonify({'status': 'Created', 'id': new_item.id}), 201
@@ -440,6 +430,9 @@ def handle_item(item_id):
             item.description = data.get('description', item.description)
             item.price = int(data.get('price', item.price))
             item.available = bool(data.get('available', item.available))
+            item.restaurant_id = data.get('restaurant_id', item.restaurant_id)
+            if (not user.superuser and item.restaurant_id != user.restaurant_id):
+                return jsonify({'error': 'Admin super access required or edit only your restaurant items'}), 403
             db.session.commit()
             return jsonify({'status': 'Updated'})
         except (ValueError, TypeError):
@@ -464,7 +457,8 @@ def get_user():
     return jsonify({
         'id': current_user.id,
         'superuser': current_user.superuser,
-        'username': current_user.username
+        'username': current_user.username,
+        'restaurant_id': current_user.restaurant_id
     }), 200
 
 
@@ -485,6 +479,9 @@ def handle_restaurants():
         user = validate_token(token)
         if not user or not isinstance(user, AdminUser):
             return jsonify({'error': 'Admin access required'}), 403
+        if not user.superuser:
+            return jsonify({'error': 'Admin super access required'}), 403
+        
         data = request.get_json()
         try:
             new_restaurant = Restaurant(
@@ -529,7 +526,8 @@ def update_restaurant(restaurant_id):
         restaurant = Restaurant.query.get(restaurant_id)
         if not restaurant:
             return jsonify({'error': 'Restaurant not found'}), 404
-
+        if (not user.superuser and restaurant.id != user.restaurant_id):
+            return jsonify({'error': 'Admin super access required or edit only your restaurant'}), 403
         data = request.get_json()
         try:
             restaurant.name = data.get('name', restaurant.name)
@@ -614,6 +612,8 @@ def add_sample_user():
         db.session.add(new_item)
 
     db.session.commit()
+    print("Sample examples created")
+    print("!!!REMOVE THIS PRODUCTION!!!") #TODO: remove in production!
 
 def getPrice(item_id):
     item = Item.query.get(item_id)
@@ -626,4 +626,4 @@ if __name__ == '__main__':
         db.create_all()
     app.run(host='0.0.0.0', port=8000, debug=True)
     # with app.app_context():
-    #     db.drop_all()
+    #     db.drop_all() #Only for testing purposes, usage of this will DROP ALL TABLES!!!

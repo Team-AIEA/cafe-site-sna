@@ -15,6 +15,42 @@ const Orders = () => {
     const [selectedRestaurant, setSelectedRestaurant] = useState(''); // empty means "All"
     const [loadingOrders, setLoadingOrders] = useState({});
     const [updatedOrders, setUpdatedOrders] = useState({});
+    const [restaurantId, setRestaurantId] = useState(null);
+    const [superuser, setSuperuser] = useState(false);
+
+    useEffect(() => {
+        const token = localStorage.getItem('access_token');
+        if (!token) {
+            navigate('/login', { replace: true });
+            return;
+        }
+
+        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
+
+        // Fetch user info
+        fetch(`${API_BASE_URL}/api/user`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+        })
+        .then((response) => {
+            if (response.status === 401 || response.status === 403) {
+                navigate('/login', { replace: true });
+            } else if (!response.ok) {
+                throw new Error('Failed to fetch user details');
+            }
+            return response.json();
+        })
+        .then((data) => {
+            setSuperuser(data.superuser);
+            setRestaurantId(data.restaurant_id);
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+            navigate('/login', { replace: true });
+        });
+    }, [navigate]);
 
     useEffect(() => {
         const token = localStorage.getItem('access_token');
@@ -110,17 +146,20 @@ const Orders = () => {
                 <label>
                     Filter by Restaurant:
                     <select className='filter' value={selectedRestaurant} onChange={(e) => setSelectedRestaurant(e.target.value)}>
-                        <option value="">All Restaurants</option>
-                        {orders && [...new Set(orders.map(order => order.restaurant_id))].map(id => (
+                        {superuser && <option value="">All Restaurants</option>}
+                        {orders && superuser && [...new Set(orders.map(order => order.restaurant_id))].map(id => (
                             <option key={id} value={id}>Restaurant #{id}</option>
                         ))}
+                        {orders && !superuser && (
+                            <option value={restaurantId}>Restaurant #{restaurantId}</option>
+                        )}
                     </select>
                 </label>
             </div>
 
             <ul className='menu-div'>
                 {orders
-                    .filter(order => selectedRestaurant === '' || order.restaurant_id === Number(selectedRestaurant))
+                    .filter(order => selectedRestaurant === (superuser?'':restaurantId) || order.restaurant_id === Number(selectedRestaurant))
                     .map((order) => (
 
                     <li key={order.id} className='cart-items' id='admin'>
