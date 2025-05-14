@@ -160,3 +160,7 @@ li {
 .nothing {
   height: 45px;
 }
+
+button{
+  cursor: pointer;
+}
