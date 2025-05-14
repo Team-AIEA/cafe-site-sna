@@ -19,7 +19,7 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 # Enable CORS for the Flask app
-CORS(app, resources={r"/*": {"origins": ["http://localhost:5173", "http://38.244.138.103:22594"]}}, supports_credentials=True) #TODO: change to production domain
+CORS(app, resources={r"/*": {"origins": ["http://localhost:5173", "http://38.244.138.103:22594", "https://38.244.138.103:5173"]}}, supports_credentials=True) #TODO: change to production domain
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
 db = SQLAlchemy(app)
 
