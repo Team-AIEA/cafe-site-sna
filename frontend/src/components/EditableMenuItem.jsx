@@ -1,12 +1,11 @@
 import React, { useState } from "react";
 import "./MenuItem.css";
 
-const EditableMenuItem = ({ id, name, price, img, description, available }) => {
+const EditableMenuItem = ({ id, name, price, img, description, available, editable }) => {
     const [localName, setLocalName] = useState(name);
     const [localDescription, setLocalDescription] = useState(description);
     const [localPrice, setLocalPrice] = useState(price);
     const [localAvailable, setLocalAvailable] = useState(available);
-
     const updateBackend = async (data) => {
         try {
             const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
@@ -31,24 +30,28 @@ const EditableMenuItem = ({ id, name, price, img, description, available }) => {
     };
 
     const onNameChange = (e) => {
+        if (!editable) return;
         const newName = e.target.value;
         setLocalName(newName);
         updateBackend({ name: newName });
     };
 
     const onDescriptionChange = (e) => {
+        if (!editable) return;
         const newDescription = e.target.value;
         setLocalDescription(newDescription);
         updateBackend({ description: newDescription });
     };
 
     const onAvailabilityChange = (e) => {
+        if (!editable) return;
         const newAvailable = e.target.checked;
         setLocalAvailable(newAvailable);
         updateBackend({ available: newAvailable });
     };
 
     const onPriceChange = (e) => {
+        if (!editable) return;
         const newPrice = parseFloat(e.target.value);
         if (!isNaN(newPrice)) {
             setLocalPrice(newPrice);
@@ -64,17 +67,20 @@ const EditableMenuItem = ({ id, name, price, img, description, available }) => {
                 id="edit"
                 value={localName}
                 onChange={onNameChange}
+                readOnly={!editable}
             />
             <input
                 className="menu-item-description"
                 value={localDescription}
                 onChange={onDescriptionChange}
+                readOnly={!editable}
             />
             <input
                 className="menu-item-availability"
                 type="checkbox"
                 checked={localAvailable}
                 onChange={onAvailabilityChange}
+                readOnly={!editable}
             />
             <input
                 className="menu-item-description"
@@ -82,6 +88,7 @@ const EditableMenuItem = ({ id, name, price, img, description, available }) => {
                 onChange={onPriceChange}
                 type="number"
                 step="0.01"
+                readOnly={!editable}
             />
         </div>
     );

@@ -16,7 +16,41 @@ const RestaurantsItem = () => {
     });
 
     const navigate = useNavigate();
+    const [restaurantId, setRestaurantId] = useState(null);
+    const [superuser, setSuperuser] = useState(false);
+    useEffect(() => {
+        const token = localStorage.getItem('access_token');
+        if (!token) {
+            navigate('/login', { replace: true });
+            return;
+        }
 
+        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
+
+        // Fetch user info
+        fetch(`${API_BASE_URL}/api/user`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+        })
+        .then((response) => {
+            if (response.status === 401 || response.status === 403) {
+                navigate('/login', { replace: true });
+            } else if (!response.ok) {
+                throw new Error('Failed to fetch user details');
+            }
+            return response.json();
+        })
+        .then((data) => {
+            setSuperuser(data.superuser);
+            setRestaurantId(data.restaurant_id);
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+            navigate('/login', { replace: true });
+        });
+    }, [navigate]);
     useEffect(() => {
         const token = localStorage.getItem('access_token');
         if (!token) {
@@ -166,9 +200,12 @@ const RestaurantsItem = () => {
                             </div>
                         ) : (
                             <>
+                            
                                 <p>{restaurant.address} — {restaurant.working_hours} — {restaurant.contact_info}</p>
                                 <p>{restaurant.description}</p>
-                                <button className='butt-order' onClick={() => setEditingRestaurantId(restaurant.id)}>Edit</button>
+                                {(superuser || restaurant.id == restaurantId) && (<button className='butt-order' onClick={() => setEditingRestaurantId(restaurant.id)}>Edit</button>
+                                )}
+
                             </>
                         )}
 
@@ -176,7 +213,7 @@ const RestaurantsItem = () => {
                             <>
                                 <p><em>Menu:</em></p>
                                 <ul id="items">
-                                    <AddMenuItem
+                                    {(superuser || restaurantId == selectedRestaurantId) && (<AddMenuItem
                                         restaurant_id={restaurant.id}
                                         onItemAdded={async (newItem) => {
                                             // Ensure that newItem is valid before updating state
@@ -194,7 +231,7 @@ const RestaurantsItem = () => {
                                                 )
                                             );
                                         }}
-                                    />
+                                    />)}
 
                                     {restaurant.items && restaurant.items.length > 0 ? (
                                         restaurant.items.map(item => (
@@ -208,6 +245,7 @@ const RestaurantsItem = () => {
                                                 val={item.price}
                                                 description={item.description}
                                                 available={item.available}
+                                                editable={superuser || restaurantId == selectedRestaurantId}
                                             />
                                         ))
                                     ) : (
@@ -219,45 +257,48 @@ const RestaurantsItem = () => {
                     </li>
                 ))}
             </ul>
-
-            <h1>Add New Restaurant</h1>
-            <div className="div-add">
-                <input
-                    type="text"
-                    placeholder="Name"
-                    value={newRestaurant.name}
-                    onChange={(e) => handleInputChange(e, 'name')}
-                    className="menu-item-description"
-                />
-                <input
-                    type="text"
-                    placeholder="Address"
-                    value={newRestaurant.address}
-                    onChange={(e) => handleInputChange(e, 'address')}
-                    className="menu-item-description"
-                />
-                <input
-                    type="text"
-                    placeholder="Working Hours"
-                    value={newRestaurant.working_hours}
-                    onChange={(e) => handleInputChange(e, 'working_hours')}
-                    className="menu-item-description"
-                />
-                <input
-                    type="text"
-                    placeholder="Contact Info"
-                    value={newRestaurant.contact_info}
-                    onChange={(e) => handleInputChange(e, 'contact_info')}
-                    className="menu-item-description"
-                />
-                <textarea
-                    placeholder="Description"
-                    value={newRestaurant.description}
-                    onChange={(e) => handleInputChange(e, 'description')}
-                    className="menu-item-description"
-                />
-                <button className="butt-order" id="save" onClick={addRestaurant}>Add Restaurant</button>
-            </div>
+            {superuser && (
+                <>
+                    <h1>Add New Restaurant</h1>
+                    <div className="div-add">
+                        <input
+                            type="text"
+                            placeholder="Name"
+                            value={newRestaurant.name}
+                            onChange={(e) => handleInputChange(e, 'name')}
+                            className="menu-item-description"
+                        />
+                        <input
+                            type="text"
+                            placeholder="Address"
+                            value={newRestaurant.address}
+                            onChange={(e) => handleInputChange(e, 'address')}
+                            className="menu-item-description"
+                        />
+                        <input
+                            type="text"
+                            placeholder="Working Hours"
+                            value={newRestaurant.working_hours}
+                            onChange={(e) => handleInputChange(e, 'working_hours')}
+                            className="menu-item-description"
+                        />
+                        <input
+                            type="text"
+                            placeholder="Contact Info"
+                            value={newRestaurant.contact_info}
+                            onChange={(e) => handleInputChange(e, 'contact_info')}
+                            className="menu-item-description"
+                        />
+                        <textarea
+                            placeholder="Description"
+                            value={newRestaurant.description}
+                            onChange={(e) => handleInputChange(e, 'description')}
+                            className="menu-item-description"
+                        />
+                        <button className="butt-order" id="save" onClick={addRestaurant}>Add Restaurant</button>
+                    </div>
+                </>
+            )}
         </>
     );
 };

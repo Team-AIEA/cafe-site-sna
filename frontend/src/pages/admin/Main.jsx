@@ -16,6 +16,7 @@ function Main() {
     const navigate = useNavigate();
     const [restaurants, setRestaurants] = useState([]);
     const [superuser, setSuperuser] = useState(false);
+    const [restaurantId, setRestaurantId] = useState(null);
     useEffect(() => {
         const token = localStorage.getItem('access_token');
         if (!token) {
@@ -43,6 +44,7 @@ function Main() {
             .then((data) => {
                 setUsername(data.username);
                 setSuperuser(data.superuser);
+                setRestaurantId(data.restaurant_id);
             })
             .catch((error) => {
                 console.error('Error:', error);
@@ -128,6 +130,9 @@ function Main() {
         <>
             <div className="header">
                 <h1>Hi {username}! {superuser && '👑'}</h1>
+                <div style={{ textAlign: 'center' }}>
+                    <label>Your restaurant ID: {restaurantId}</label>
+                </div>
                 <button className="status-cancelled" id="logout" onClick={handleLogout}>Log out</button>
             </div>
 

@@ -222,12 +222,24 @@ def logout():
 @app.route('/api/signup', methods=['POST'])
 @admin_required
 def signup():
+    auth_header = request.headers.get('Authorization')
+    if not auth_header or not auth_header.startswith('Bearer '):
+        return jsonify({'error': 'Admin access required'}), 403
+    token = auth_header.replace('Bearer ', '')
+    user = validate_token(token)
+    if not user or not isinstance(user, AdminUser):
+        return jsonify({'error': 'Admin access required'}), 403
+    if not user.superuser:
+        return jsonify({'error': 'Admin super access required'}), 403
+        
     data = request.get_json()
+    print(data)
     if not data or 'username' not in data or 'password' not in data or 'restaurant_id' not in data:
         return jsonify({'error': 'Invalid input. Username, password, and restaurant_id are required.'}), 400
 
     # Check if the username already exists
     if AdminUser.query.filter_by(username=data['username']).first():
+        print('Username already exists')
         return jsonify({'error': 'Username already exists'}), 400
 
     # Validate restaurant_id
@@ -295,6 +307,8 @@ def order(order_id):
 
         data = request.get_json()
         try:
+            if (not user.superuser and order.restaurant_id != user.restaurant_id):
+                return jsonify({'error': 'Admin super access required or edit only your restaurant orders'}), 403
             if 'status' in data:
                 print('Status:', data['status'])
                 print(int(data['status']) not in [0, 1, 2, 3])
@@ -321,8 +335,6 @@ def order(order_id):
                 else:
                     return jsonify({'error': 'Invalid status transition'}), 400
                 
-            # if 'items' in data:
-            #     order.items = data['items']
             db.session.commit()
             return jsonify({'message': 'Order updated'}), 200
         except (TypeError, ValueError):
@@ -402,6 +414,8 @@ def handle_items():
                 restaurant_id=data.get('restaurant_id'),
                 src=data.get('src', '')
             )
+            if (not user.superuser and new_item.restaurant_id != user.restaurant_id):
+                return jsonify({'error': 'Admin super access required or edit only your restaurant'}), 403
             db.session.add(new_item)
             db.session.commit()
             return jsonify({'status': 'Created', 'id': new_item.id}), 201
@@ -440,6 +454,9 @@ def handle_item(item_id):
             item.description = data.get('description', item.description)
             item.price = int(data.get('price', item.price))
             item.available = bool(data.get('available', item.available))
+            item.restaurant_id = data.get('restaurant_id', item.restaurant_id)
+            if (not user.superuser and item.restaurant_id != user.restaurant_id):
+                return jsonify({'error': 'Admin super access required or edit only your restaurant items'}), 403
             db.session.commit()
             return jsonify({'status': 'Updated'})
         except (ValueError, TypeError):
@@ -464,7 +481,8 @@ def get_user():
     return jsonify({
         'id': current_user.id,
         'superuser': current_user.superuser,
-        'username': current_user.username
+        'username': current_user.username,
+        'restaurant_id': current_user.restaurant_id
     }), 200
 
 
@@ -485,6 +503,9 @@ def handle_restaurants():
         user = validate_token(token)
         if not user or not isinstance(user, AdminUser):
             return jsonify({'error': 'Admin access required'}), 403
+        if not user.superuser:
+            return jsonify({'error': 'Admin super access required'}), 403
+        
         data = request.get_json()
         try:
             new_restaurant = Restaurant(
@@ -529,7 +550,8 @@ def update_restaurant(restaurant_id):
         restaurant = Restaurant.query.get(restaurant_id)
         if not restaurant:
             return jsonify({'error': 'Restaurant not found'}), 404
-
+        if (not user.superuser and restaurant.id != user.restaurant_id):
+            return jsonify({'error': 'Admin super access required or edit only your restaurant'}), 403
         data = request.get_json()
         try:
             restaurant.name = data.get('name', restaurant.name)
