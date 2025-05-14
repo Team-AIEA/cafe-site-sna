@@ -10,7 +10,7 @@ input {
     width: 98%;
 }
 
-.cart-items {
+.cart-items#admin {
     width: 30%;
     color: white;
 }

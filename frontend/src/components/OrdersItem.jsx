@@ -123,7 +123,7 @@ const Orders = () => {
                     .filter(order => selectedRestaurant === '' || order.restaurant_id === Number(selectedRestaurant))
                     .map((order) => (
 
-                    <li key={order.id} className='cart-items' id='orders'>
+                    <li key={order.id} className='cart-items' id='admin'>
                         <strong>
                             Order #{order.id}</strong><br/>{STATUS_OPTIONS[order.status]?.label || 'Unknown'} — Restaurant {order.restaurant_id} — Table {order.table_id} — Order Number {order.order_number} — {order.total_cost}$
                         
