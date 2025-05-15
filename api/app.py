@@ -1,6 +1,7 @@
 from flask import Flask, flash, jsonify, redirect, render_template, request, url_for
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user, UserMixin
 from flask_sqlalchemy import SQLAlchemy
+from flask_cors import CORS
 from sqlalchemy.dialects.postgresql import JSON
 from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
@@ -13,6 +14,7 @@ from flask_cors import CORS
 load_dotenv()  # Load environment variables from .env file
 
 app = Flask(__name__)
+CORS(app)
 app.secret_key = os.getenv('SECRET_KEY')
 
 login_manager = LoginManager()
@@ -624,6 +626,6 @@ def getPrice(item_id):
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-    app.run(host='0.0.0.0', port=8000, debug=True)
+    app.run(host='0.0.0.0', port=5050, debug=True)
     # with app.app_context():
     #     db.drop_all() #Only for testing purposes, usage of this will DROP ALL TABLES!!!
