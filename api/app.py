@@ -10,12 +10,49 @@ import os
 import jwt
 from datetime import datetime, timedelta, timezone
 from flask_cors import CORS
+import logging
+from pythonjsonlogger import jsonlogger
+
+def setup_logging():
+    formatter = jsonlogger.JsonFormatter(
+        '%(asctime)s %(levelname)s %(message)s %(module)s %(funcName)s %(lineno)s %(pathname)s',
+        rename_fields={
+            'levelname': 'severity',
+            'asctime': 'timestamp'
+        },
+        datefmt='%Y-%m-%dT%H:%M:%S%z'
+    )
+
+    file_handler = logging.FileHandler('api.json')
+    file_handler.setFormatter(formatter)
+    file_handler.setLevel(logging.INFO)
+
+    syslog_handler = logging.handlers.SysLogHandler(address=('logstash', 5000))
+    syslog_handler.setFormatter(formatter)
+    syslog_handler.setLevel(logging.INFO)
+
+    app.logger.handlers.clear()
+    app.logger.addHandler(file_handler)
+    app.logger.addHandler(syslog_handler)
+    app.logger.setLevel(logging.INFO)
+
+    sql_logger = logging.getLogger('sqlalchemy.engine')
+    sql_logger.addHandler(file_handler)
+    sql_logger.addHandler(syslog_handler)
+    sql_logger.setLevel(logging.WARNING)
+
+    werkzeug_logger = logging.getLogger('werkzeug')
+    werkzeug_logger.handlers.clear()
+    werkzeug_logger.addHandler(syslog_handler)
+    werkzeug_logger.setLevel(logging.WARNING)
 
 load_dotenv()  # Load environment variables from .env file
 
 app = Flask(__name__)
 CORS(app)
 app.secret_key = os.getenv('SECRET_KEY')
+
+setup_logging()
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -24,6 +61,8 @@ login_manager.init_app(app)
 CORS(app, resources={r"/*": {"origins": ["http://localhost:5173", "http://38.244.138.103:22594", "https://38.244.138.103:5173"]}}, supports_credentials=True) #TODO: change to production domain
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
 db = SQLAlchemy(app)
+
+app.config['SQLALCHEMY_ECHO'] = True
 
 # 👑 Admin users
 class AdminUser(UserMixin, db.Model):
@@ -144,17 +183,20 @@ def generate_token(user_id):
     return token
 
 # Utility function to validate the token and retrieve the user
-def validate_token(token:str):
+def validate_token(token: str):
     try:
         payload = jwt.decode(token, app.secret_key, algorithms=['HS256'])
         user = AdminUser.query.get(payload['user_id'])
-        if user:
-            return user
+        if not user:
+            logging.warning(f"Invalid token: user not found (token: {token})")
+            return None
+        return user
     except jwt.ExpiredSignatureError:
+        logging.warning("Token expired")
         return None
-    except jwt.InvalidTokenError:
+    except jwt.InvalidTokenError as e:
+        logging.error(f"Invalid token: {e}")
         return None
-    return None
 
 
 # Utility function to check if the current user is an admin
@@ -186,7 +228,13 @@ def index():
 @app.route('/api/login', methods=['POST'])
 def login():
     data = request.get_json()
+    app.logger.info('Login attempt', extra={
+        'username': data.get('username'),
+        'ip': request.remote_addr
+    })
+
     if not data or 'username' not in data or 'password' not in data:
+        app.logger.warning('Invalid login input')
         return jsonify({'error': 'Invalid input'}), 400
 
     user = AdminUser.query.filter_by(username=data['username']).first()
@@ -194,6 +242,11 @@ def login():
         # Generate a token (e.g., JWT)
         token = generate_token(user.id)  # Replace with your token generation logic
         login_user(user)  # sets current_user
+
+        app.logger.info('Login successful', extra={
+            'user_id': user.id,
+            'username': user.username
+        })
 
         # Set the token in a secure cookie
         response = jsonify({'message': 'Logged in', 'token': token})
@@ -221,7 +274,7 @@ def signup():
         return jsonify({'error': 'Admin access required'}), 403
     if not user.superuser:
         return jsonify({'error': 'Admin super access required'}), 403
-        
+
     data = request.get_json()
 
     if not data or 'username' not in data or 'password' not in data or 'restaurant_id' not in data:
@@ -244,7 +297,6 @@ def signup():
     new_admin.set_password(data['password'])
     db.session.add(new_admin)
     db.session.commit()
-
 
     return jsonify({'message': 'User created successfully'}), 201
 
@@ -313,7 +365,7 @@ def order(order_id):
                     order.status = 3
                 else:
                     return jsonify({'error': 'Invalid status transition'}), 400
-                
+
             db.session.commit()
             return jsonify({'message': 'Order updated'}), 200
         except (TypeError, ValueError):
@@ -321,13 +373,23 @@ def order(order_id):
 
 @app.route('/api/order/', methods=['POST'])
 def orderNew():
-    data = request.get_json()
     try:
+        data = request.get_json()
+        app.logger.info('New order request', extra={
+            'restaurant_id': data.get('restaurant_id'),
+            'table_id': data.get('table_id'),
+            'items_count': len(data.get('items', {})),
+            'ip': request.remote_addr,
+            'endpoint': '/api/order/',
+            'method': 'POST'
+        })
+
         restaurant_id = int(data.get('restaurant_id'))
         table_id = int(data.get('table_id'))
         items = data.get('items', {})  # {"item_id": quantity}
-        
+
         if not isinstance(items, dict) or not all(isinstance(v, int) for v in items.values()):
+            app.logger.error('Invalid items format in order')
             return jsonify({'error': 'Invalid items format. Expected a dictionary of {"item_id": quantity}'}), 410
 
         new_items = []
@@ -336,7 +398,6 @@ def orderNew():
 
         order_number = int(datetime.now().timestamp())
         status = 0  # Order placed
-
         total_cost = sum(item.price * item.quantity for item in new_items)
 
         new_order = Order(
@@ -350,9 +411,21 @@ def orderNew():
 
         db.session.add(new_order)
         db.session.commit()
+
+        app.logger.info('Order created successfully', extra={
+            'order_id': new_order.id,
+            'restaurant_id': restaurant_id,
+            'total_cost': total_cost,
+            'items_count': len(items)
+        })
+
         return jsonify({'message': 'Order created', 'id': new_order.id}), 201
 
-    except (TypeError, ValueError):
+    except (TypeError, ValueError) as e:
+        app.logger.error('Order creation failed', extra={
+            'error': str(e),
+            'data': str(data)
+        })
         return jsonify({'error': 'Invalid input'}), 400
 
 
@@ -483,7 +556,7 @@ def handle_restaurants():
             return jsonify({'error': 'Admin access required'}), 403
         if not user.superuser:
             return jsonify({'error': 'Admin super access required'}), 403
-        
+
         data = request.get_json()
         try:
             new_restaurant = Restaurant(
