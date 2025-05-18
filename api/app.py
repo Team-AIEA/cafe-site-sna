@@ -27,7 +27,7 @@ def setup_logging():
     file_handler.setFormatter(formatter)
     file_handler.setLevel(logging.INFO)
 
-    syslog_handler = logging.handlers.SysLogHandler(address=('logstash', 5000))
+    syslog_handler = logging.handlers.SysLogHandler(address=('logstash', 5050))
     syslog_handler.setFormatter(formatter)
     syslog_handler.setLevel(logging.INFO)
 
