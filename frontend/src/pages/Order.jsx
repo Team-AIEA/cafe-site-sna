@@ -59,7 +59,7 @@ function Order() {
     console.log(order.status);
     return (
         <div className='cart-main'>
-            <a href="/"><img className='butt-up' src='../src/assets/back.png' /></a>
+            <a href="/"><img className='butt-up' src='/back.png' /></a>
             <h1>Order Details</h1>
             <div className='cart-items'>
             <p><strong>Order ID:</strong> {order.id}</p>

@@ -12,6 +12,12 @@ services:
       - ./api/.env
     depends_on:
       - db
+      - logstash
+    logging:
+      driver: "syslog"
+      options:
+        syslog-address: "tcp://logstash:5050"
+        tag: "backend"
 
   frontend:
     build:
@@ -20,15 +26,18 @@ services:
     command: npm run build
     working_dir: /app
     environment:
-      - VITE_API_BASE_URL=http://38.244.138.103:5050
+      - VITE_API_BASE_URL=https://dmosc.ru/api
   nginx:
     image: nginx:alpine
     container_name: nginx
     ports:
-      - "8081:80"
+      - "80:80"
+      - "443:443"
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
       - ./frontend/dist:/usr/share/nginx/html
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
     depends_on:
       - frontend
       - backend
@@ -43,5 +52,48 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enables=false
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9200"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.12.0
+    volumes:
+      - ./logstash/config:/usr/share/logstash/config
+      - ./logstash/pipeline:/usr/share/logstash/pipeline
+    ports:
+      - "5050:5050"
+    depends_on:
+      - elasticsearch
+    environment:
+      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.12.0
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+    environment:
+      ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
 volumes:
   pgdata:
+  esdata:
